@@ -10,11 +10,11 @@ export default function Categories() {
   useEffect(() => {
     api
       .get("categories/")
-      .then(res => {
+      .then((res) => {
         setCategories(res.data);
         setLoading(false);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         setLoading(false);
       });
@@ -24,7 +24,7 @@ export default function Categories() {
     if (!confirm("Delete this category?")) return;
     try {
       await api.delete(`categories/${id}/`);
-      setCategories(prev => prev.filter(c => c.id !== id));
+      setCategories((prev) => prev.filter((c) => c.id !== id));
     } catch (err) {
       console.error(err);
     }
@@ -34,21 +34,30 @@ export default function Categories() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Categories</h1>
-        <Link to="/add-category" className="px-3 py-1 bg-green-600 text-white rounded">
+
+      {/* Page Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-serif text-[var(--gold)]">Categories</h1>
+
+        <Link to="/add-category" className="btn-primary">
           Add Category
         </Link>
       </div>
 
+      {/* Categories Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {categories.map(cat => (
-          <div key={cat.id} className="p-4 bg-white rounded shadow flex justify-between">
-            <div>{cat.name}</div>
+        {categories.map((cat) => (
+          <div
+            key={cat.id}
+            className="card flex justify-between items-center"
+          >
+            {/* Category Name */}
+            <span className="text-lg">{cat.name}</span>
 
+            {/* Delete Button */}
             <button
               onClick={() => handleDelete(cat.id)}
-              className="px-2 py-1 bg-red-500 text-white rounded"
+              className="btn-danger"
             >
               Delete
             </button>

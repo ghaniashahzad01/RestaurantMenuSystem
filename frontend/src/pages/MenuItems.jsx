@@ -10,11 +10,11 @@ export default function MenuItems() {
   function load() {
     api
       .get("menu/")
-      .then(res => {
+      .then((res) => {
         setItems(res.data);
         setLoading(false);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         setLoading(false);
       });
@@ -47,47 +47,75 @@ export default function MenuItems() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Menu Items</h1>
-        <Link to="/add-menu-item" className="px-3 py-1 bg-green-600 text-white rounded">
+
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-serif text-[var(--gold)]">Menu Items</h1>
+        <Link to="/add-menu-item" className="btn-primary">
           Add Item
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {items.map(i => (
-          <div key={i.id} className="p-4 bg-white rounded shadow">
-            <div className="font-bold">{i.name}</div>
-            <div className="text-sm text-gray-600">{i.category_name}</div>
-            <div className="text-sm mb-2">Rs. {i.price}</div>
+      {/* Items Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {items.map((i) => (
+          <div key={i.id} className="card">
 
-            {i.image && (
-              <img
-                src={`http://127.0.0.1:8000${i.image}`}
-                alt={i.name}
-                className="w-24 h-24 object-cover rounded mb-3"
-              />
+            {/* Title + Category */}
+            <div className="mb-3">
+              <div className="text-xl font-serif">{i.name}</div>
+              <div className="text-[var(--muted-text)] text-sm">{i.category_name}</div>
+            </div>
+
+            {/* Price */}
+            <div className="text-[var(--gold)] font-semibold mb-3">
+              Rs. {i.price}
+            </div>
+
+            {/* Image */}
+            <div className="w-full h-40 bg-[#2A2622] rounded overflow-hidden flex items-center justify-center mb-4">
+              {i.image ? (
+                <img
+                  src={`http://127.0.0.1:8000${i.image}`}
+                  alt={i.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-[var(--muted-text)]">No Image</span>
+              )}
+            </div>
+
+            {/* Special Badge */}
+            {i.is_special && (
+              <div className="inline-block mb-3 px-2 py-1 bg-[var(--gold)] text-[var(--dark-bg)] text-xs rounded">
+                SPECIAL ITEM
+              </div>
             )}
 
+            {/* Action Buttons */}
             <div className="flex gap-2">
-              <Link to={`/edit-menu-item/${i.id}`} className="px-2 py-1 border rounded">
+              <Link
+                to={`/edit-menu-item/${i.id}`}
+                className="px-3 py-1 border border-[var(--gold)] text-[var(--warm-text)] rounded hover:bg-[#2A2622]"
+              >
                 Edit
               </Link>
 
               <button
                 onClick={() => toggleSpecial(i.id)}
-                className="px-2 py-1 bg-yellow-500 text-white rounded"
+                className="px-3 py-1 bg-[var(--gold)] text-[var(--dark-bg)] rounded"
               >
-                {i.is_special ? "Unmark Special" : "Mark Special"}
+                {i.is_special ? "Unmark" : "Mark"}
               </button>
 
               <button
                 onClick={() => handleDelete(i.id)}
-                className="px-2 py-1 bg-red-500 text-white rounded"
+                className="btn-danger"
               >
                 Delete
               </button>
             </div>
+
           </div>
         ))}
       </div>

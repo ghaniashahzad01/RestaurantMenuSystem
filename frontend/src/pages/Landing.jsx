@@ -2,32 +2,27 @@ import { Link } from "react-router-dom";
 
 export default function Landing() {
   return (
-    <div className="bg-gradient-to-b from-white to-gray-50 min-h-[70vh] flex items-center">
-      <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+    <div className="min-h-[85vh] flex items-center justify-center px-4">
+      <div className="grid md:grid-cols-2 gap-10 items-center max-w-6xl">
+        
         <div>
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-4">
-            Manage your restaurant menu, simply.
-          </h1>
-          <p className="text-gray-700 mb-6">
-            Create, update, and organize dishes with a clean admin dashboard.
-            Highlight today's specials and view simple analytics — fast and secure.
+          <h1 className="text-5xl font-serif mb-4 text-[var(--gold)]">Welcome to Royal Dine</h1>
+          <p className="text-[var(--muted-text)] mb-6 text-lg">
+            A premium restaurant experience — managed with a modern digital dashboard.
+            Explore menu items, specials, and track analytics effortlessly.
           </p>
 
-          <div className="flex gap-3">
-            <Link to="/login" className="px-6 py-3 bg-blue-600 text-white rounded font-medium">
-              Admin Login
-            </Link>
-            <Link to="/menu-items" className="px-6 py-3 border border-gray-300 rounded">
-              View Menu
-            </Link>
+          <div className="flex gap-4">
+            <Link to="/menu-items" className="btn-primary">View Menu</Link>
+            <Link to="/login" className="btn-dark border border-[var(--gold)]">Admin Login</Link>
           </div>
         </div>
 
-        <div className="flex justify-center">
-          <div className="w-full max-w-md">
-            <img src="/src/assets/restaurant-hero.jpg" alt="menu" className="rounded shadow-lg" />
-           
-          </div>
+        <div>
+          <img 
+            src="/src/assets/restaurant-hero.jpg" 
+            className="rounded-xl shadow-lg opacity-90"
+          />
         </div>
       </div>
     </div>

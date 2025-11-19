@@ -1,8 +1,16 @@
 export default function Footer() {
   return (
-    <footer className="bg-gray-50 mt-12 border-t">
-      <div className="container mx-auto px-4 py-6 text-center text-sm text-gray-600">
-        © {new Date().getFullYear()} Restaurant Menu Management • Built by Ghania
+    <footer
+      className="mt-12 py-6 text-center"
+      style={{ background: "#1A1714" }}  // matches navbar + sidebar
+    >
+      <div className="text-sm text-[var(--muted-text)]">
+        © {new Date().getFullYear()}{" "}
+        <span className="text-[var(--gold)] font-serif">
+          Restaurant Menu Management
+        </span>{" "}
+        • Built by{" "}
+        <span className="text-[var(--gold)] font-medium">Ghania</span>
       </div>
     </footer>
   );

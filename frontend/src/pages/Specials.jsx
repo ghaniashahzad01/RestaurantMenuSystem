@@ -9,11 +9,11 @@ export default function Specials() {
   useEffect(() => {
     api
       .get("menu/")
-      .then(res => {
-        setItems(res.data.filter(i => i.is_special));
+      .then((res) => {
+        setItems(res.data.filter((i) => i.is_special));
         setLoading(false);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         setLoading(false);
       });
@@ -23,14 +23,33 @@ export default function Specials() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Today's Specials</h1>
+      {/* Page Heading */}
+      <h1 className="text-3xl font-serif text-[var(--gold)] mb-6">
+        Today's Specials
+      </h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {items.map(i => (
-          <div key={i.id} className="p-4 bg-white rounded shadow">
-            <div className="font-bold">{i.name}</div>
-            <div className="text-gray-600 text-sm">{i.category_name}</div>
-            <div className="mt-2 font-medium">Rs. {i.price}</div>
+      {/* Specials Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {items.map((i) => (
+          <div key={i.id} className="card">
+
+            {/* Name & Category */}
+            <div className="mb-3">
+              <div className="text-xl font-serif">{i.name}</div>
+              <div className="text-[var(--muted-text)] text-sm">
+                {i.category_name}
+              </div>
+            </div>
+
+            {/* Price */}
+            <div className="text-[var(--gold)] font-semibold mb-3">
+              Rs. {i.price}
+            </div>
+
+            {/* Special Badge */}
+            <div className="inline-block px-2 py-1 bg-[var(--gold)] text-[var(--dark-bg)] text-xs rounded">
+              SPECIAL ITEM
+            </div>
           </div>
         ))}
       </div>

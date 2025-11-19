@@ -8,32 +8,33 @@ export default function Navbar({ user, setUser }) {
     try {
       await api.post("logout/");
       setUser(null);
-      navigate("/login");
+      navigate("/");
     } catch (err) {
-      console.error("Logout failed", err);
+      console.error(err);
     }
   }
 
   return (
-    <nav className="bg-white shadow-md">
+    <header className="w-full shadow-md" style={{ background: "#1A1714" }}>
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link to="/" className="text-xl font-bold">Restaurant Menu</Link>
+        <Link to="/" className="text-[var(--gold)] text-2xl font-serif">
+          🍽 Royal Dine
+        </Link>
 
-        <div className="flex items-center gap-4">
-          <Link to="/menu-items" className="hover:underline">Menu</Link>
-          <Link to="/categories" className="hover:underline">Categories</Link>
-          <Link to="/analytics" className="hover:underline">Analytics</Link>
+        <nav className="flex items-center gap-6">
+          <Link to="/menu-items" className="text-[var(--warm-text)] hover:text-[var(--gold)]">Menu</Link>
+          <Link to="/specials" className="text-[var(--warm-text)] hover:text-[var(--gold)]">Specials</Link>
 
           {user ? (
             <>
-              <span className="text-sm">Hi, {user.username}</span>
-              <button onClick={handleLogout} className="ml-2 px-3 py-1 bg-red-500 text-white rounded">Logout</button>
+              <span className="text-[var(--muted-text)]">Hi, <strong>{user.username}</strong></span>
+              <button className="btn-primary" onClick={handleLogout}>Logout</button>
             </>
           ) : (
-            <Link to="/login" className="px-3 py-1 bg-blue-600 text-white rounded">Login</Link>
+            <Link className="btn-primary" to="/login">Admin Login</Link>
           )}
-        </div>
+        </nav>
       </div>
-    </nav>
+    </header>
   );
 }

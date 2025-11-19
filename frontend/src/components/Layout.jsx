@@ -1,14 +1,17 @@
 import Navbar from "./Navbar";
-import Footer from "./Footer";
+import Sidebar from "./Sidebar";
 
 export default function Layout({ children, user, setUser }) {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar user={user} setUser={setUser} />
-      <main className="grow container mx-auto px-4 py-6">
-        {children}
-      </main>
-      <Footer />
+
+      <div className="flex flex-1">
+        <Sidebar />
+        <main className="flex-1 p-6">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

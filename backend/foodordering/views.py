@@ -49,19 +49,28 @@ class CategoryAnalyticsView(APIView):
         return Response(data)
 
 
-# ---------- LOGIN ----------
+from rest_framework.parsers import JSONParser
+from rest_framework.permissions import AllowAny
+
 class LoginView(APIView):
+    permission_classes = [AllowAny]
+    parser_classes = [JSONParser]
+
     def post(self, request):
         username = request.data.get("username")
         password = request.data.get("password")
 
-        user = authenticate(request, username=username, password=password)
+        user = authenticate(username=username, password=password)
 
-        if user:
+        if user is not None:
             login(request, user)
-            return Response({"message": "Login success", "username": user.username})
-        
-        return Response({"message": "Invalid credentials"}, status=400)
+            return Response({
+                "message": "Login success",
+                "username": user.username
+            })
+        else:
+            return Response({"message": "Invalid credentials"}, status=400)
+
 
 
 # ---------- LOGOUT ----------

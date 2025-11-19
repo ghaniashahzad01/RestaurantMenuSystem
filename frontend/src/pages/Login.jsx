@@ -11,12 +11,13 @@ export default function Login({ setUser }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+
     try {
       const res = await api.post("login/", { username, password });
-      // backend returns username on success
+
       if (res.data.username) {
         setUser({ username: res.data.username });
-        navigate("/dashboard");
+        navigate("/dashboard"); // Redirect on success
       } else {
         setError("Invalid credentials");
       }
@@ -26,25 +27,59 @@ export default function Login({ setUser }) {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-10 bg-white rounded shadow p-6">
-      <h2 className="text-2xl font-bold mb-4">Admin Login</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm">Username</label>
-          <input value={username} onChange={e => setUsername(e.target.value)} className="w-full border px-3 py-2 rounded" required />
-        </div>
+    <div className="min-h-[70vh] flex items-center justify-center px-4">
+      <div className="card w-full max-w-md">
+        {/* Title */}
+        <h2 className="text-2xl font-serif text-[var(--gold)] mb-4 text-center">
+          Admin Login
+        </h2>
 
-        <div>
-          <label className="block text-sm">Password</label>
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full border px-3 py-2 rounded" required />
-        </div>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          
+          {/* Username */}
+          <div>
+            <label className="text-[var(--muted-text)] text-sm mb-1 block">
+              Username
+            </label>
+            <input
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="admin"
+              className="w-full"
+              required
+            />
+          </div>
 
-        <div>
-          <button className="w-full bg-blue-600 text-white py-2 rounded">Login</button>
-        </div>
+          {/* Password */}
+          <div>
+            <label className="text-[var(--muted-text)] text-sm mb-1 block">
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••"
+              className="w-full"
+              required
+            />
+          </div>
 
-        {error && <div className="text-red-600 text-sm">{error}</div>}
-      </form>
+          {/* Submit Button */}
+          <div>
+            <button className="btn-primary w-full">Login</button>
+          </div>
+
+          {/* Error message */}
+          {error && (
+            <div className="text-[var(--danger)] text-sm text-center">
+              {error}
+            </div>
+          )}
+
+        </form>
+      </div>
     </div>
   );
 }

@@ -1,47 +1,40 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
-import { Link } from "react-router-dom";
 
 export default function Dashboard() {
-  const [stats, setStats] = useState({ categories: 0, items: 0, specials: 0 });
+  const [stats, setStats] = useState({ categories:0, items:0, specials:0 });
 
   useEffect(() => {
-    async function loadStats() {
-      try {
-        // categories count
-        const catRes = await api.get("categories/");
-        const menuRes = await api.get("menu/");
-        const specials = menuRes.data.filter(i => i.is_special).length;
-        setStats({
-          categories: catRes.data.length,
-          items: menuRes.data.length,
-          specials,
-        });
-      } catch (err) {
-        console.error(err);
-      }
+    async function load() {
+      const cat = await api.get("categories/");
+      const menu = await api.get("menu/");
+      setStats({
+        categories: cat.data.length,
+        items: menu.data.length,
+        specials: menu.data.filter(i => i.is_special).length
+      });
     }
-    loadStats();
+    load();
   }, []);
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 bg-white rounded shadow">
-          <div className="text-sm text-gray-500">Categories</div>
-          <div className="text-2xl font-bold">{stats.categories}</div>
-          <Link to="/categories" className="text-sm text-blue-600 mt-2 inline-block">Manage</Link>
+    <div className="space-y-6">
+      <h1 className="text-3xl font-serif text-[var(--gold)]">Dashboard Overview</h1>
+
+      <div className="grid md:grid-cols-3 gap-6">
+        <div className="card">
+          <p className="text-[var(--muted-text)] text-sm">Categories</p>
+          <p className="text-4xl font-serif">{stats.categories}</p>
         </div>
-        <div className="p-4 bg-white rounded shadow">
-          <div className="text-sm text-gray-500">Menu Items</div>
-          <div className="text-2xl font-bold">{stats.items}</div>
-          <Link to="/menu-items" className="text-sm text-blue-600 mt-2 inline-block">Manage</Link>
+
+        <div className="card">
+          <p className="text-[var(--muted-text)] text-sm">Menu Items</p>
+          <p className="text-4xl font-serif">{stats.items}</p>
         </div>
-        <div className="p-4 bg-white rounded shadow">
-          <div className="text-sm text-gray-500">Specials</div>
-          <div className="text-2xl font-bold">{stats.specials}</div>
-          <Link to="/specials" className="text-sm text-blue-600 mt-2 inline-block">View Specials</Link>
+
+        <div className="card">
+          <p className="text-[var(--muted-text)] text-sm">Specials</p>
+          <p className="text-4xl font-serif">{stats.specials}</p>
         </div>
       </div>
     </div>
