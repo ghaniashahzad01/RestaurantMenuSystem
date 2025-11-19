@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     # Your app
     'foodordering',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -56,6 +57,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'restaurant_backend.urls'
+
+AUTH_USER_MODEL = "accounts.CustomUser"
 
 TEMPLATES = [
     {

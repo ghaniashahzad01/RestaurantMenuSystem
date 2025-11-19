@@ -1,0 +1,64 @@
+from django.db import models
+from django.contrib.auth.models import (
+    AbstractBaseUser, BaseUserManager, PermissionsMixin
+)
+from django.utils import timezone
+from django.conf import settings
+
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, password=None, full_name="", **extra_fields):
+        if not email:
+            raise ValueError("Email is required")
+        email = self.normalize_email(email)
+        user = self.model(email=email, full_name=full_name, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, full_name="", **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("Superuser must have is_staff=True.")
+        return self.create_user(email, password, full_name, **extra_fields)
+
+class CustomUser(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(unique=True)
+    full_name = models.CharField(max_length=255, blank=True)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    date_joined = models.DateTimeField(default=timezone.now)
+
+    objects = CustomUserManager()
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
+
+    def __str__(self):
+        return self.email
+
+# Simple cart item model (per-user)
+class CartItem(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="cart_items")
+    menu_item = models.ForeignKey("foodordering.MenuItem", on_delete=models.CASCADE)  # adjust model path if different
+    quantity = models.PositiveIntegerField(default=1)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "menu_item")
+
+# Order + OrderItem
+class Order(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="orders")
+    created_at = models.DateTimeField(auto_now_add=True)
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    name = models.CharField(max_length=255)   # customer's name
+    email = models.EmailField()
+    phone = models.CharField(max_length=50, blank=True)
+    address = models.TextField(blank=True)
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
+    menu_item = models.ForeignKey("foodordering.MenuItem", on_delete=models.PROTECT)
+    quantity = models.PositiveIntegerField(default=1)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
