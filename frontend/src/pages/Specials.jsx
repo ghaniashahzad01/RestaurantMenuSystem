@@ -1,22 +1,36 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 export default function Specials() {
   const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get("menu/").then(res => setItems(res.data.filter(i => i.is_special))).catch(err => console.error(err));
+    api
+      .get("menu/")
+      .then(res => {
+        setItems(res.data.filter(i => i.is_special));
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
   }, []);
+
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">Today's Specials</h1>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {items.map(i => (
           <div key={i.id} className="p-4 bg-white rounded shadow">
             <div className="font-bold">{i.name}</div>
-            <div className="text-sm text-gray-600">{i.category_name}</div>
-            <div>Rs. {i.price}</div>
+            <div className="text-gray-600 text-sm">{i.category_name}</div>
+            <div className="mt-2 font-medium">Rs. {i.price}</div>
           </div>
         ))}
       </div>
