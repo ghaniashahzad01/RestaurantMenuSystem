@@ -26,7 +26,7 @@ export default function Landing() {
         <div className="flex justify-center">
           <div className="w-full max-w-md">
             <img src="/src/assets/restaurant-hero.jpg" alt="menu" className="rounded shadow-lg" />
-            {/* If you don't have an image, remove the <img> or use /src/assets/placeholder.png */}
+           
           </div>
         </div>
       </div>
