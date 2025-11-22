@@ -2,12 +2,17 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.views import APIView
+from rest_framework.parsers import JSONParser
+from rest_framework.permissions import AllowAny
 
+# Admin-side models
 from .models import Category, MenuItem
 from .serializers import CategorySerializer, MenuItemSerializer
 
 
-# ---------- CATEGORY CRUD ----------
+# ---------------------------------------
+# CATEGORY CRUD
+# ---------------------------------------
 class CategoryListCreateView(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -18,7 +23,9 @@ class CategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CategorySerializer
 
 
-# ---------- MENU ITEM CRUD ----------
+# ---------------------------------------
+# MENU ITEM CRUD
+# ---------------------------------------
 class MenuItemListCreateView(generics.ListCreateAPIView):
     queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
@@ -29,7 +36,9 @@ class MenuItemDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = MenuItemSerializer
 
 
-# ---------- TOGGLE SPECIAL ----------
+# ---------------------------------------
+# TOGGLE SPECIAL
+# ---------------------------------------
 class ToggleSpecialView(APIView):
     def post(self, request, pk):
         item = MenuItem.objects.get(id=pk)
@@ -38,42 +47,51 @@ class ToggleSpecialView(APIView):
         return Response({"message": "Special status updated"})
 
 
-# ---------- ANALYTICS ----------
+# ---------------------------------------
+# CATEGORY ANALYTICS (Admin)
+# ---------------------------------------
 class CategoryAnalyticsView(APIView):
     def get(self, request):
         data = []
         categories = Category.objects.all()
+
         for cat in categories:
             count = MenuItem.objects.filter(category=cat).count()
             data.append({"category": cat.name, "count": count})
+
         return Response(data)
 
 
-from rest_framework.parsers import JSONParser
-from rest_framework.permissions import AllowAny
-
+# ---------------------------------------
+# ADMIN LOGIN
+# ---------------------------------------
+# ADMIN LOGIN
 class LoginView(APIView):
     permission_classes = [AllowAny]
-    parser_classes = [JSONParser]
 
     def post(self, request):
-        username = request.data.get("username")
+        email = request.data.get("email")
         password = request.data.get("password")
 
-        user = authenticate(username=username, password=password)
+        user = authenticate(request, username=email, password=password)
 
-        if user is not None:
+        if user and user.is_staff:
             login(request, user)
             return Response({
-                "message": "Login success",
-                "username": user.username
+                "id": user.id,
+                "email": user.email,
+                "full_name": user.full_name,
+                "is_staff": user.is_staff
             })
-        else:
-            return Response({"message": "Invalid credentials"}, status=400)
+
+        return Response({"message": "Invalid admin credentials"}, status=400)
 
 
 
-# ---------- LOGOUT ----------
+
+# ---------------------------------------
+# ADMIN LOGOUT
+# ---------------------------------------
 class LogoutView(APIView):
     def post(self, request):
         logout(request)

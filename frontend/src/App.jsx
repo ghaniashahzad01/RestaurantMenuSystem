@@ -1,12 +1,24 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useState, useEffect } from "react";
-import api from "./services/api";
-import Layout from "./components/Layout";
-import ProtectedRoute from "./components/ProtectedRoute";
+import { useState } from "react";
 
-// pages
+import Layout from "./components/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";        // ADMIN
+import UserProtectedRoute from "./components/UserProtectedRoute"; // USER
+
+import api from "./services/api";
+
+// USER MODULE
+import UserRegister from "./user/UserRegister";
+import UserLogin from "./user/UserLogin";
+import UserMenu from "./user/UserMenu";
+import Cart from "./user/Cart";
+import Checkout from "./user/Checkout";
+import OrderSuccess from "./user/OrderSuccess";
+import OrderHistory from "./user/OrderHistory";
+
+// ADMIN MODULE
 import Landing from "./pages/Landing";
-import Login from "./pages/Login";
+import AdminLogin from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Categories from "./pages/Categories";
 import MenuItems from "./pages/MenuItems";
@@ -17,59 +29,41 @@ import Specials from "./pages/Specials";
 import Analytics from "./pages/Analytics";
 
 export default function App() {
+  const [admin, setAdmin] = useState(null);
   const [user, setUser] = useState(null);
-
-  // Try to detect session (optional)
-  useEffect(() => {
-    // You may implement a /me endpoint; for now, no auto-check.
-    // If you create /api/me/ to return current logged-in user, call it here and setUser.
-  }, []);
 
   return (
     <BrowserRouter>
-      <Layout user={user} setUser={setUser}>
+      <Layout admin={admin} setAdmin={setAdmin} user={user} setUser={setUser}>
+
         <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login setUser={setUser} />} />
+          {/* PUBLIC HOME */}
+          <Route path="/" element={<Landing admin={admin} />} />
 
-          <Route path="/dashboard" element={
-            <ProtectedRoute user={user}>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
+          {/* ⭐ ADMIN AUTH */}
+          <Route path="/admin-login" element={<AdminLogin setAdmin={setAdmin} />} />
 
-          <Route path="/categories" element={
-            <ProtectedRoute user={user}>
-              <Categories />
-            </ProtectedRoute>
-          } />
+          {/* ⭐ USER AUTH */}
+          <Route path="/user-login" element={<UserLogin setUser={setUser} />} />
+          <Route path="/register" element={<UserRegister />} />
 
-          <Route path="/add-category" element={
-            <ProtectedRoute user={user}>
-              <AddCategory />
-            </ProtectedRoute>
-          } />
+          {/* ⭐ ADMIN PROTECTED ROUTES */}
+          <Route path="/dashboard" element={<ProtectedRoute admin={admin}><Dashboard /></ProtectedRoute>} />
+          <Route path="/categories" element={<ProtectedRoute admin={admin}><Categories /></ProtectedRoute>} />
+          <Route path="/add-category" element={<ProtectedRoute admin={admin}><AddCategory /></ProtectedRoute>} />
+          <Route path="/menu-items" element={<ProtectedRoute admin={admin}><MenuItems /></ProtectedRoute>} />
+          <Route path="/add-menu-item" element={<ProtectedRoute admin={admin}><AddMenuItem /></ProtectedRoute>} />
+          <Route path="/edit-menu-item/:id" element={<ProtectedRoute admin={admin}><EditMenuItem /></ProtectedRoute>} />
+          <Route path="/specials" element={<ProtectedRoute admin={admin}><Specials /></ProtectedRoute>} />
+          <Route path="/analytics" element={<ProtectedRoute admin={admin}><Analytics /></ProtectedRoute>} />
 
-          <Route path="/menu-items" element={<MenuItems />} />
+          {/* ⭐ USER PROTECTED ROUTES */}
+          <Route path="/menu" element={<UserMenu />} />
+          <Route path="/cart" element={<UserProtectedRoute user={user}><Cart /></UserProtectedRoute>} />
+          <Route path="/checkout" element={<UserProtectedRoute user={user}><Checkout /></UserProtectedRoute>} />
+          <Route path="/order-success/:id" element={<UserProtectedRoute user={user}><OrderSuccess /></UserProtectedRoute>} />
+          <Route path="/orders" element={<UserProtectedRoute user={user}><OrderHistory /></UserProtectedRoute>} />
 
-          <Route path="/add-menu-item" element={
-            <ProtectedRoute user={user}>
-              <AddMenuItem />
-            </ProtectedRoute>
-          } />
-
-          <Route path="/edit-menu-item/:id" element={
-            <ProtectedRoute user={user}>
-              <EditMenuItem />
-            </ProtectedRoute>
-          } />
-
-          <Route path="/specials" element={<Specials />} />
-          <Route path="/analytics" element={
-            <ProtectedRoute user={user}>
-              <Analytics />
-            </ProtectedRoute>
-          } />
         </Routes>
       </Layout>
     </BrowserRouter>

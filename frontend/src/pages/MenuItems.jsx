@@ -47,10 +47,11 @@ export default function MenuItems() {
 
   return (
     <div>
-
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-serif text-[var(--gold)]">Menu Items</h1>
+        <h1 className="text-3xl font-serif text-[var(--gold)]">
+          Menu Items
+        </h1>
         <Link to="/add-menu-item" className="btn-primary">
           Add Item
         </Link>
@@ -60,11 +61,12 @@ export default function MenuItems() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {items.map((i) => (
           <div key={i.id} className="card">
-
             {/* Title + Category */}
             <div className="mb-3">
               <div className="text-xl font-serif">{i.name}</div>
-              <div className="text-[var(--muted-text)] text-sm">{i.category_name}</div>
+              <div className="text-[var(--muted-text)] text-sm">
+                {i.category_name}
+              </div>
             </div>
 
             {/* Price */}
@@ -76,7 +78,7 @@ export default function MenuItems() {
             <div className="w-full h-40 bg-[#2A2622] rounded overflow-hidden flex items-center justify-center mb-4">
               {i.image ? (
                 <img
-                  src={`http://127.0.0.1:8000${i.image}`}
+                  src={i.image}
                   alt={i.name}
                   className="w-full h-full object-cover"
                 />
@@ -96,22 +98,19 @@ export default function MenuItems() {
             <div className="flex gap-2">
               <Link
                 to={`/edit-menu-item/${i.id}`}
-                className="px-3 py-1 border border-[var(--gold)] text-[var(--warm-text)] rounded hover:bg-[#2A2622]"
-              >
+                className="px-3 py-1 border border-[var(--gold)] text-[var(--warm-text)] rounded hover:bg-[#2A2622]">
                 Edit
               </Link>
 
               <button
                 onClick={() => toggleSpecial(i.id)}
-                className="px-3 py-1 bg-[var(--gold)] text-[var(--dark-bg)] rounded"
-              >
+                className="px-3 py-1 bg-[var(--gold)] text-[var(--dark-bg)] rounded">
                 {i.is_special ? "Unmark" : "Mark"}
               </button>
 
               <button
                 onClick={() => handleDelete(i.id)}
-                className="btn-danger"
-              >
+                className="btn-danger">
                 Delete
               </button>
             </div>

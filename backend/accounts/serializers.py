@@ -1,10 +1,16 @@
+# backend/accounts/serializers.py
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import CartItem, Order, OrderItem
-from foodordering.serializers import MenuItemSerializer  # optional: reuse if exists
+
+from .models import Cart, CartItem, Order, OrderItem
+from foodordering.serializers import MenuItemSerializer
 
 User = get_user_model()
 
+
+# -------------------------
+# USER REGISTER
+# -------------------------
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)
 
@@ -17,40 +23,56 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(password=password, **validated_data)
         return user
 
+
+# -------------------------
+# USER DETAILS
+# -------------------------
 class UserSerializer(serializers.ModelSerializer):
+    is_staff = serializers.BooleanField(read_only=True)
+
     class Meta:
         model = User
-        fields = ("id", "email", "full_name")
+        fields = ("id", "email", "full_name", "is_staff")
 
+
+
+# -------------------------
+# CART ITEM SERIALIZER
+# -------------------------
 class CartItemSerializer(serializers.ModelSerializer):
-    menu_item = serializers.PrimaryKeyRelatedField(read_only=True)
-    menu_item_detail = serializers.SerializerMethodField()
+    menu_item_detail = MenuItemSerializer(source="menu_item", read_only=True)
 
     class Meta:
         model = CartItem
-        fields = ("id", "menu_item", "menu_item_detail", "quantity")
+        fields = ["id", "menu_item", "quantity", "menu_item_detail"]
 
-    def get_menu_item_detail(self, obj):
-        # return basic menu info
-        return {
-            "id": obj.menu_item.id,
-            "name": obj.menu_item.name,
-            "price": str(obj.menu_item.price),
-            "image": obj.menu_item.image.url if obj.menu_item.image else None,
-            "category_name": obj.menu_item.category.name if getattr(obj.menu_item, "category", None) else ""
-        }
 
+# -------------------------
+# ORDER ITEM SERIALIZER
+# -------------------------
 class OrderItemSerializer(serializers.ModelSerializer):
-    menu_item_detail = serializers.SerializerMethodField()
+    menu_item_detail = MenuItemSerializer(source="menu_item", read_only=True)
+
     class Meta:
         model = OrderItem
-        fields = ("menu_item_detail", "quantity", "unit_price")
+        fields = ["id", "quantity", "unit_price", "menu_item_detail"]
 
-    def get_menu_item_detail(self, obj):
-        return {"id": obj.menu_item.id, "name": obj.menu_item.name, "price": str(obj.unit_price)}
 
+# -------------------------
+# ORDER SERIALIZER
+# -------------------------
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
+
     class Meta:
         model = Order
-        fields = ("id", "created_at", "total", "name", "email", "phone", "address", "items")
+        fields = [
+            "id",
+            "created_at",
+            "total",
+            "name",
+            "email",
+            "phone",
+            "address",
+            "items",
+        ]

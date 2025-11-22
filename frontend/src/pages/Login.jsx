@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
-export default function Login({ setUser }) {
-  const [username, setUsername] = useState("");
+export default function AdminLogin({ setAdmin }) {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -13,71 +13,56 @@ export default function Login({ setUser }) {
     setError("");
 
     try {
-      const res = await api.post("login/", { username, password });
+      const res = await api.post("admin/login/", { email, password });
 
-      if (res.data.username) {
-        setUser({ username: res.data.username });
-        navigate("/dashboard"); // Redirect on success
+      console.log("ADMIN LOGIN RESPONSE:", res.data);
+
+      if (res.data.is_staff) {
+        setAdmin(res.data);
+        navigate("/dashboard");
       } else {
-        setError("Invalid credentials");
+        setError("Not an admin account.");
       }
+
     } catch (err) {
-      setError("Login failed. Check credentials.");
+      setError("Invalid credentials.");
     }
   }
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-4">
       <div className="card w-full max-w-md">
-        {/* Title */}
+
         <h2 className="text-2xl font-serif text-[var(--gold)] mb-4 text-center">
           Admin Login
         </h2>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          
-          {/* Username */}
           <div>
-            <label className="text-[var(--muted-text)] text-sm mb-1 block">
-              Username
-            </label>
+            <label className="text-[var(--muted-text)] text-sm mb-1 block">Email</label>
             <input
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="admin"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@gmail.com"
               className="w-full"
               required
             />
           </div>
 
-          {/* Password */}
           <div>
-            <label className="text-[var(--muted-text)] text-sm mb-1 block">
-              Password
-            </label>
+            <label className="text-[var(--muted-text)] text-sm mb-1 block">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••"
               className="w-full"
               required
             />
           </div>
 
-          {/* Submit Button */}
-          <div>
-            <button className="btn-primary w-full">Login</button>
-          </div>
+          <button className="btn-primary w-full">Login</button>
 
-          {/* Error message */}
-          {error && (
-            <div className="text-[var(--danger)] text-sm text-center">
-              {error}
-            </div>
-          )}
-
+          {error && <div className="text-[var(--danger)] text-sm text-center">{error}</div>}
         </form>
       </div>
     </div>

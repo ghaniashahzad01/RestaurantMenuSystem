@@ -1,5 +1,9 @@
+# backend/accounts/urls.py
 from django.urls import path
-from .views import RegisterView, LoginView, LogoutView, MeView, CartView, CartAddView, CartRemoveView, OrderCreateView, OrderListView
+from .views import (
+    RegisterView, LoginView, LogoutView, MeView,
+    CartView, CartAddView, CartRemoveView, OrderCreateView, OrderListView
+)
 
 urlpatterns = [
     path("register/", RegisterView.as_view(), name="user-register"),
