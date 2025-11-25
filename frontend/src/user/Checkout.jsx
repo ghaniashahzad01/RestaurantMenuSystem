@@ -11,6 +11,7 @@ export default function Checkout() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState(""); // ⭐ NEW
   const [err, setErr] = useState("");
 
   const total = cart.reduce(
@@ -20,32 +21,37 @@ export default function Checkout() {
   );
 
   async function handleOrder(e) {
-  e.preventDefault();
-  setErr("");
+    e.preventDefault();
+    setErr("");
 
-  try {
-    const res = await api.post("user/orders/", {
-      name,
-      email,
-      phone,
-      address,
-    });
+    if (!paymentMethod) {
+      setErr("Please select a payment method.");
+      return;
+    }
 
-    reload();
-    navigate(`/order-success/${res.data.id}`);
-  } catch (error) {
-    setErr("Failed to place order");
+    try {
+      const res = await api.post("user/orders/", {
+        name,
+        email,
+        phone,
+        address,
+        payment_method: paymentMethod, // ⭐ SEND COD
+      });
+
+      reload();
+      navigate(`/order-success/${res.data.id}`);
+    } catch (error) {
+      setErr("Failed to place order");
+    }
   }
-}
-
 
   return (
     <div>
       <h1 className="text-3xl font-serif text-[var(--gold)] mb-8">Checkout</h1>
 
       <div className="grid md:grid-cols-2 gap-8">
-        
-        {/* LEFT FORM */}
+
+        {/* LEFT: FORM */}
         <form className="card p-6 space-y-4 shadow-lg" onSubmit={handleOrder}>
           <div>
             <label className="text-[var(--muted-text)] text-sm block mb-1">
@@ -99,6 +105,23 @@ export default function Checkout() {
             />
           </div>
 
+          {/* ⭐ PAYMENT METHOD */}
+          <div className="mt-4">
+            <h3 className="text-lg font-medium mb-2">Payment Method</h3>
+
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="radio"
+                name="payment"
+                value="COD"
+                checked={paymentMethod === "COD"}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="w-4 h-4"
+              />
+              <span>Cash on Delivery (COD)</span>
+            </label>
+          </div>
+
           <button
             className="bg-[var(--gold)] text-black py-3 rounded font-semibold tracking-wide text-lg mt-4 hover:opacity-90 transition w-full"
           >
@@ -108,13 +131,16 @@ export default function Checkout() {
           {err && <div className="text-[var(--danger)] mt-2">{err}</div>}
         </form>
 
-        {/* RIGHT SUMMARY */}
+        {/* RIGHT: ORDER SUMMARY */}
         <div className="card p-6 shadow-lg">
           <h3 className="font-semibold mb-4 text-xl">Order Summary</h3>
 
           <div className="space-y-3">
             {cart.map((ci) => (
-              <div key={ci.id} className="flex justify-between border-b border-[#3a342e] pb-2">
+              <div
+                key={ci.id}
+                className="flex justify-between border-b border-[#3a342e] pb-2"
+              >
                 <span>
                   {ci.menu_item_detail.name} × {ci.quantity}
                 </span>
@@ -127,9 +153,7 @@ export default function Checkout() {
 
           <div className="flex justify-between mt-6 text-lg font-medium">
             <span>Total</span>
-            <span className="text-[var(--gold)]">
-              Rs. {total.toFixed(2)}
-            </span>
+            <span className="text-[var(--gold)]">Rs. {total.toFixed(2)}</span>
           </div>
         </div>
 

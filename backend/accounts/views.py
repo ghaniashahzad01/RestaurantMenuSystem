@@ -154,6 +154,8 @@ class OrderCreateView(APIView):
         email = request.data.get("email", user.email)
         phone = request.data.get("phone", "")
         address = request.data.get("address", "")
+        payment_method = request.data.get("payment_method", "COD")
+
 
         cart_items = CartItem.objects.filter(cart__user=user)
         if not cart_items.exists():

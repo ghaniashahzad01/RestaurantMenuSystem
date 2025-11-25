@@ -31,19 +31,20 @@ export default function App() {
   const [user, setUser] = useState(null);
 
   return (
-    <Layout admin={admin} setAdmin={setAdmin} user={user} setUser={setUser}>
+    <Layout 
+      admin={admin} 
+      setAdmin={setAdmin} 
+      user={user} 
+      setUser={setUser}
+    >
       <Routes>
-        {/* PUBLIC HOME */}
         <Route path="/" element={<Landing admin={admin} />} />
-
-        {/* ADMIN AUTH */}
+        
         <Route path="/admin-login" element={<AdminLogin setAdmin={setAdmin} />} />
 
-        {/* USER AUTH */}
         <Route path="/user-login" element={<UserLogin setUser={setUser} />} />
         <Route path="/register" element={<UserRegister />} />
 
-        {/* ADMIN PROTECTED */}
         <Route path="/dashboard" element={<ProtectedRoute admin={admin}><Dashboard /></ProtectedRoute>} />
         <Route path="/categories" element={<ProtectedRoute admin={admin}><Categories /></ProtectedRoute>} />
         <Route path="/add-category" element={<ProtectedRoute admin={admin}><AddCategory /></ProtectedRoute>} />
@@ -53,7 +54,6 @@ export default function App() {
         <Route path="/specials" element={<ProtectedRoute admin={admin}><Specials /></ProtectedRoute>} />
         <Route path="/analytics" element={<ProtectedRoute admin={admin}><Analytics /></ProtectedRoute>} />
 
-        {/* USER PROTECTED */}
         <Route path="/menu" element={<UserMenu />} />
         <Route path="/cart" element={<UserProtectedRoute user={user}><Cart /></UserProtectedRoute>} />
         <Route path="/checkout" element={<UserProtectedRoute user={user}><Checkout /></UserProtectedRoute>} />
