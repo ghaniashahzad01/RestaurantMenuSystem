@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-export default function Landing({ admin }) {
+export default function Landing() {
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4">
       <div className="grid md:grid-cols-2 gap-10 items-center max-w-6xl">
@@ -19,20 +19,10 @@ export default function Landing({ admin }) {
           {/* BUTTONS */}
           <div className="flex gap-4">
 
-            {/* Always visible */}
+            {/* Only user buttons here */}
             <Link to="/menu" className="btn-primary">
               View Menu
             </Link>
-
-            {/* Only show Admin login if admin is not logged in */}
-            {!admin && (
-              <Link 
-                to="/admin-login"
-                className="btn-dark border border-[var(--gold)]"
-              >
-                Admin Login
-              </Link>
-            )}
 
           </div>
         </div>

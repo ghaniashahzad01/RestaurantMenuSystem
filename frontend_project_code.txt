@@ -1,0 +1,2010 @@
+﻿========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\eslint.config.js
+========================================
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import { defineConfig, globalIgnores } from 'eslint/config'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{js,jsx}'],
+    extends: [
+      js.configs.recommended,
+      reactHooks.configs.flat.recommended,
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        ecmaFeatures: { jsx: true },
+        sourceType: 'module',
+      },
+    },
+    rules: {
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+    },
+  },
+])
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\index.html
+========================================
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>frontend</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\vite.config.js
+========================================
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineConfig({
+  plugins: [
+    react(),
+    tailwindcss(),
+  ],
+})
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\App.css
+========================================
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\App.jsx
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useState } from "react";
+
+import Layout from "./components/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";        // ADMIN
+import UserProtectedRoute from "./components/UserProtectedRoute"; // USER
+
+import { CartProvider } from "./context/CartContext";  // ⭐ MUST IMPORT
+
+// USER MODULE
+import UserRegister from "./user/UserRegister";
+import UserLogin from "./user/UserLogin";
+import UserMenu from "./user/UserMenu";
+import Cart from "./user/Cart";
+import Checkout from "./user/Checkout";
+import OrderSuccess from "./user/OrderSuccess";
+import OrderHistory from "./user/OrderHistory";
+
+// ADMIN MODULE
+import Landing from "./pages/Landing";
+import AdminLogin from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Categories from "./pages/Categories";
+import MenuItems from "./pages/MenuItems";
+import AddCategory from "./pages/AddCategory";
+import AddMenuItem from "./pages/AddMenuItem";
+import EditMenuItem from "./pages/EditMenuItem";
+import Specials from "./pages/Specials";
+import Analytics from "./pages/Analytics";
+
+export default function App() {
+  const [admin, setAdmin] = useState(null);
+  const [user, setUser] = useState(null);
+
+  return (
+    // ⭐⭐⭐ Entire App wrapped in CartProvider ⭐⭐⭐
+    <CartProvider>
+      <BrowserRouter>
+        <Layout admin={admin} setAdmin={setAdmin} user={user} setUser={setUser}>
+
+          <Routes>
+            {/* PUBLIC HOME */}
+            <Route path="/" element={<Landing admin={admin} />} />
+
+            {/* ⭐ ADMIN AUTH */}
+            <Route path="/admin-login" element={<AdminLogin setAdmin={setAdmin} />} />
+
+            {/* ⭐ USER AUTH */}
+            <Route path="/user-login" element={<UserLogin setUser={setUser} />} />
+            <Route path="/register" element={<UserRegister />} />
+
+            {/* ⭐ ADMIN PROTECTED ROUTES */}
+            <Route path="/dashboard" element={<ProtectedRoute admin={admin}><Dashboard /></ProtectedRoute>} />
+            <Route path="/categories" element={<ProtectedRoute admin={admin}><Categories /></ProtectedRoute>} />
+            <Route path="/add-category" element={<ProtectedRoute admin={admin}><AddCategory /></ProtectedRoute>} />
+            <Route path="/menu-items" element={<ProtectedRoute admin={admin}><MenuItems /></ProtectedRoute>} />
+            <Route path="/add-menu-item" element={<ProtectedRoute admin={admin}><AddMenuItem /></ProtectedRoute>} />
+            <Route path="/edit-menu-item/:id" element={<ProtectedRoute admin={admin}><EditMenuItem /></ProtectedRoute>} />
+            <Route path="/specials" element={<ProtectedRoute admin={admin}><Specials /></ProtectedRoute>} />
+            <Route path="/analytics" element={<ProtectedRoute admin={admin}><Analytics /></ProtectedRoute>} />
+
+            {/* ⭐ USER PROTECTED ROUTES */}
+            <Route path="/menu" element={<UserMenu />} />
+            <Route path="/cart" element={<UserProtectedRoute user={user}><Cart /></UserProtectedRoute>} />
+            <Route path="/checkout" element={<UserProtectedRoute user={user}><Checkout /></UserProtectedRoute>} />
+            <Route path="/order-success/:id" element={<UserProtectedRoute user={user}><OrderSuccess /></UserProtectedRoute>} />
+            <Route path="/orders" element={<UserProtectedRoute user={user}><OrderHistory /></UserProtectedRoute>} />
+
+          </Routes>
+        </Layout>
+      </BrowserRouter>
+    </CartProvider>
+  );
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\index.css
+========================================
+@import "tailwindcss";
+
+/* Warm Dark Restaurant Theme */
+:root {
+  --dark-bg: #12100E;
+  --dark-card: #1E1A17;
+  --gold: #D4A574;
+  --warm-text: #F5EEDC;
+  --muted-text: #C7BFB2;
+  --danger: #A83A3A;
+}
+
+body {
+  background: var(--dark-bg);
+  color: var(--warm-text);
+  font-family: 'Inter', sans-serif;
+}
+
+/* Buttons */
+.btn-primary {
+  background: var(--gold);
+  color: var(--dark-bg);
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.btn-dark {
+  background: var(--dark-card);
+  color: var(--warm-text);
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+}
+
+/* Cards */
+.card {
+  background: var(--dark-card);
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0px 0px 10px rgba(212,165,116,0.1);
+}
+
+/* Inputs */
+input, select, textarea {
+  background: #2A2622;
+  color: var(--warm-text);
+  padding: .6rem;
+  border-radius: 6px;
+  border: 1px solid #3A332E;
+}
+input::placeholder, textarea::placeholder {
+  color: var(--muted-text);
+}
+========================================
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+import { CartProvider } from "./context/CartContext";
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+   <CartProvider>
+      <App />
+   </CartProvider>
+  </StrictMode>,
+)
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\components\Footer.jsx
+========================================
+export default function Footer() {
+  return (
+    <footer
+      className="mt-12 py-6 text-center"
+      style={{ background: "#1A1714" }}  // matches navbar + sidebar
+    >
+      <div className="text-sm text-[var(--muted-text)]">
+        © {new Date().getFullYear()}{" "}
+        <span className="text-[var(--gold)] font-serif">
+          Restaurant Menu Management
+        </span>{" "}
+        • Built by{" "}
+        <span className="text-[var(--gold)] font-medium">Ghania</span>
+      </div>
+    </footer>
+  );
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\components\FormInput.jsx
+========================================
+export default function FormInput({
+  label,
+  value,
+  onChange,
+  type = "text",
+  placeholder = "",
+  required = false,
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      {label && (
+        <label className="text-[var(--muted-text)] text-sm">
+          {label}
+        </label>
+      )}
+
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        required={required}
+        className="w-full rounded px-3 py-2
+                 bg-[#2A2622] 
+                 text-[var(--warm-text)]
+                 border border-[#3A332E]
+                 placeholder-[var(--muted-text)]
+                 focus:outline-none
+                 focus:border-[var(--gold)]
+                 focus:ring-1 focus:ring-[var(--gold)]"
+      />
+    </div>
+  );
+}
+
+
+
+========================================
+import Navbar from "./Navbar";
+import Sidebar from "./Sidebar";
+
+export default function Layout({ children, user, setUser, admin }) {
+  return (
+    <div className="min-h-screen flex flex-col">
+
+      {/* Navbar always visible */}
+      <Navbar user={user} setUser={setUser} admin={admin} />
+
+      <div className="flex flex-1">
+
+        {/* SHOW SIDEBAR ONLY IF ADMIN IS LOGGED IN */}
+        {admin && <Sidebar />}
+
+        {/* Main content always visible */}
+        <main className="flex-1 p-6">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\components\LoadingSpinner.jsx
+========================================
+export default function LoadingSpinner() {
+  return (
+    <div className="flex justify-center items-center py-10">
+      <div
+        className="w-10 h-10 border-4 rounded-full animate-spin"
+        style={{
+          borderColor: "var(--gold)",
+          borderTopColor: "transparent",
+        }}
+      ></div>
+    </div>
+  );
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\components\Navbar.jsx
+========================================
+import { Link, useNavigate } from "react-router-dom";
+import { FaShoppingCart } from "react-icons/fa";
+import api from "../services/api";
+
+export default function Navbar({ admin, user, setUser, setAdmin }) {
+  const navigate = useNavigate();
+
+  async function handleAdminLogout() {
+    try {
+      await api.post("logout/");
+      setAdmin(null);
+      navigate("/admin-login");
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handleUserLogout() {
+    try {
+      localStorage.removeItem("token");
+    setUser(null);
+    navigate("/"); 
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  return (
+    <header
+      className="w-full shadow-md sticky top-0 z-50"
+      style={{ background: "#1A1714" }}
+    >
+      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        
+        {/* LOGO */}
+        <Link to="/" className="text-[var(--gold)] text-2xl font-serif">
+          🍽 Royal Dine
+        </Link>
+
+        <nav className="flex items-center gap-6">
+
+          {/* ======================== USER NAVIGATION ======================== */}
+          {!admin && (
+            <>
+              <Link to="/menu" className="text-[var(--warm-text)] hover:text-[var(--gold)]">
+                Menu
+              </Link>
+
+              <Link to="/cart" className="flex items-center gap-1 text-[var(--warm-text)] hover:text-[var(--gold)]">
+                <FaShoppingCart size={18} /> Cart
+              </Link>
+
+              {user && (
+                <Link to="/orders" className="text-[var(--warm-text)] hover:text-[var(--gold)]">
+                  My Orders
+                </Link>
+              )}
+
+              {/* USER LOGGED IN */}
+              {user ? (
+                <>
+                  <span className="text-[var(--muted-text)]">
+                    Hi, <strong>{user.full_name}</strong>
+                  </span>
+                  <button className="btn-primary" onClick={handleUserLogout}>
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link className="btn-dark" to="/register">
+                    Register
+                  </Link>
+                  <Link className="btn-primary" to="/user-login">
+                    Login
+                  </Link>
+                </>
+              )}
+            </>
+          )}
+
+          {/* ======================== ADMIN NAVIGATION ======================== */}
+          {admin && (
+            <>
+              <Link to="/dashboard" className="text-[var(--warm-text)] hover:text-[var(--gold)]">
+                Dashboard
+              </Link>
+              <Link to="/categories" className="text-[var(--warm-text)] hover:text-[var(--gold)]">
+                Categories
+              </Link>
+              <Link to="/menu-items" className="text-[var(--warm-text)] hover:text-[var(--gold)]">
+                Menu Items
+              </Link>
+              <Link to="/analytics" className="text-[var(--warm-text)] hover:text-[var(--gold)]">
+                Analytics
+              </Link>
+
+              <span className="text-[var(--muted-text)]">
+                Admin: <strong>{admin.full_name || admin.email}</strong>
+              </span>
+
+              <button className="btn-danger" onClick={handleAdminLogout}>
+                Logout
+              </button>
+            </>
+          )}
+
+        </nav>
+      </div>
+    </header>
+  );
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\components\ProtectedRoute.jsx
+========================================
+import { Navigate } from "react-router-dom";
+
+export default function ProtectedRoute({ admin, children }) {
+  if (!admin) {
+    return <Navigate to="/admin-login" replace />;
+  }
+  return children;
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\components\Sidebar.jsx
+========================================
+import { Link } from "react-router-dom";
+
+export default function Sidebar() {
+  const active = (path) =>
+    window.location.pathname === path
+      ? "bg-[var(--gold)] text-[var(--dark-bg)]"
+      : "text-[var(--warm-text)] hover:bg-[#2A2622]";
+
+  return (
+    <aside className="hidden md:flex flex-col w-72 min-h-screen p-6" style={{ background: "#1A1714" }}>
+      <h2 className="text-xl font-serif text-[var(--gold)] mb-6">Admin Panel</h2>
+
+      <nav className="flex flex-col gap-2">
+        <Link className={`p-3 rounded-md ${active("/dashboard")}`} to="/dashboard">Dashboard</Link>
+        <Link className={`p-3 rounded-md ${active("/categories")}`} to="/categories">Categories</Link>
+        <Link className={`p-3 rounded-md ${active("/menu-items")}`} to="/menu-items">Menu Items</Link>
+        <Link className={`p-3 rounded-md ${active("/add-menu-item")}`} to="/add-menu-item">Add Item</Link>
+        <Link className={`p-3 rounded-md ${active("/specials")}`} to="/specials">Specials</Link>
+        <Link className={`p-3 rounded-md ${active("/analytics")}`} to="/analytics">Analytics</Link>
+      </nav>
+
+      <div className="mt-auto text-[var(--muted-text)] text-sm">
+        © {new Date().getFullYear()} Royal Dine
+      </div>
+    </aside>
+  );
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\components\UserProtectedRoute.jsx
+========================================
+import { Navigate } from "react-router-dom";
+
+export default function UserProtectedRoute({ user, children }) {
+  if (!user) {
+    return <Navigate to="/user-login" replace />;
+  }
+  return children;
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\context\CartContext.jsx
+========================================
+import { createContext, useContext, useEffect, useState } from "react";
+import api from "../services/api";
+
+const CartContext = createContext();
+
+export function useCart() {
+  return useContext(CartContext);
+}
+
+export function CartProvider({ children }) {
+  const [cart, setCart] = useState([]);
+
+  useEffect(() => {
+    loadCart();
+  }, []);
+
+  async function loadCart() {
+  try {
+    const res = await api.get("user/cart/");
+    setCart(res.data);
+  } catch (err) {
+    console.error("Failed to load cart:", err);
+  }
+}
+
+async function addToCart(menu_item_id, quantity = 1) {
+  try {
+    await api.post("user/cart/add/", {
+      item_id: menu_item_id,
+      quantity,
+    });
+    loadCart();
+  } catch (err) {
+    console.error("Failed to add:", err);
+  }
+}
+
+async function removeFromCart(menu_item_id) {
+  try {
+    await api.post("user/cart/remove/", {
+      item_id: menu_item_id,
+    });
+    loadCart();
+  } catch (err) {
+    console.error("Failed to remove:", err);
+  }
+}
+
+
+
+  return (
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, reload: loadCart }}>
+      {children}
+    </CartContext.Provider>
+  );
+}
+
+
+
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\pages\AddCategory.jsx
+========================================
+import { useState } from "react";
+import api from "../services/api";
+import { useNavigate } from "react-router-dom";
+
+export default function AddCategory() {
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    try {
+      await api.post("categories/", { name });
+      navigate("/categories");
+    } catch (err) {
+      setError("Failed to create category");
+    }
+  }
+
+  return (
+    <div className="max-w-md mx-auto">
+      <div className="card">
+        <h2 className="text-2xl font-serif text-[var(--gold)] mb-4">
+          Add Category
+        </h2>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="text-[var(--muted-text)] text-sm mb-1 block">
+              Category Name
+            </label>
+            <input
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="e.g., Appetizers"
+              className="w-full"
+              required
+            />
+          </div>
+
+          <div>
+            <button className="btn-primary w-full">Create Category</button>
+          </div>
+
+          {error && (
+            <div className="text-[var(--danger)] text-sm mt-2">{error}</div>
+          )}
+        </form>
+      </div>
+    </div>
+  );
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\pages\AddMenuItem.jsx
+========================================
+import { useEffect, useState } from "react";
+import api from "../services/api";
+import { useNavigate } from "react-router-dom";
+
+export default function AddMenuItem() {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [category, setCategory] = useState("");
+  const [image, setImage] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    api
+      .get("categories/")
+      .then((res) => setCategories(res.data))
+      .catch((err) => console.error(err));
+  }, []);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("description", description);
+    formData.append("price", price);
+    formData.append("category", category);
+    if (image) formData.append("image", image);
+
+    try {
+      await api.post("menu/", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      navigate("/menu-items");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to create item");
+    }
+  }
+
+  return (
+    <div className="max-w-2xl mx-auto">
+      <div className="card">
+        <h2 className="text-2xl font-serif text-[var(--gold)] mb-4">Add Menu Item</h2>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+
+          {/* Name */}
+          <div>
+            <label className="text-[var(--muted-text)] text-sm mb-1 block">Name</label>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g., Chicken Alfredo Pasta"
+              className="w-full"
+              required
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="text-[var(--muted-text)] text-sm mb-1 block">Description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Short description of the dish"
+              rows="3"
+              className="w-full"
+            />
+          </div>
+
+          {/* Price */}
+          <div>
+            <label className="text-[var(--muted-text)] text-sm mb-1 block">Price</label>
+            <input
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="600"
+              type="number"
+              className="w-full"
+              required
+            />
+          </div>
+
+          {/* Category */}
+          <div>
+            <label className="text-[var(--muted-text)] text-sm mb-1 block">Category</label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full"
+              required
+            >
+              <option value="">Select a category</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Image */}
+          <div>
+            <label className="text-[var(--muted-text)] text-sm mb-1 block">Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              className="w-full"
+              onChange={(e) => setImage(e.target.files[0])}
+            />
+          </div>
+
+          {/* Submit */}
+          <div>
+            <button className="btn-primary w-full">Create Item</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  );
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\pages\Analytics.jsx
+========================================
+import { useEffect, useState } from "react";
+import api from "../services/api";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+
+export default function Analytics() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api
+      .get("analytics/")
+      .then((res) => {
+        setData(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <LoadingSpinner />;
+
+  return (
+    <div>
+      {/* Page Title */}
+      <h1 className="text-3xl font-serif text-[var(--gold)] mb-6">
+        Category Analytics
+      </h1>
+
+      {/* Card Wrapper */}
+      <div className="card p-6">
+        <h2 className="text-xl text-[var(--warm-text)] mb-4 font-medium">
+          Menu Distribution by Categories
+        </h2>
+
+        <div style={{ width: "100%", height: 350 }}>
+          <ResponsiveContainer>
+            <BarChart data={data}>
+              {/* Grid lines styled for dark mode */}
+              <CartesianGrid stroke="#2A2622" vertical={false} />
+
+              {/* X Axis */}
+              <XAxis dataKey="category" stroke="var(--muted-text)" tick={{ fill: "var(--muted-text)" }} />
+
+              {/* Y Axis */}
+              <YAxis stroke="var(--muted-text)" tick={{ fill: "var(--muted-text)" }} />
+
+              {/* Tooltip */}
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "var(--dark-card)",
+                  border: "1px solid var(--gold)",
+                  borderRadius: "6px",
+                  color: "var(--warm-text)",
+                }}
+                labelStyle={{ color: "var(--gold)" }}
+              />
+
+              {/* Bars */}
+              <Bar dataKey="count" fill="var(--gold)" radius={[6, 6, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\pages\Categories.jsx
+========================================
+import { useEffect, useState } from "react";
+import api from "../services/api";
+import { Link } from "react-router-dom";
+import LoadingSpinner from "../components/LoadingSpinner";
+
+export default function Categories() {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api
+      .get("categories/")
+      .then((res) => {
+        setCategories(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  async function handleDelete(id) {
+    if (!confirm("Delete this category?")) return;
+    try {
+      await api.delete(`categories/${id}/`);
+      setCategories((prev) => prev.filter((c) => c.id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  if (loading) return <LoadingSpinner />;
+
+  return (
+    <div>
+
+      {/* Page Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-serif text-[var(--gold)]">Categories</h1>
+
+        <Link to="/add-category" className="btn-primary">
+          Add Category
+        </Link>
+      </div>
+
+      {/* Categories Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {categories.map((cat) => (
+          <div
+            key={cat.id}
+            className="card flex justify-between items-center"
+          >
+            {/* Category Name */}
+            <span className="text-lg">{cat.name}</span>
+
+            {/* Delete Button */}
+            <button
+              onClick={() => handleDelete(cat.id)}
+              className="btn-danger"
+            >
+              Delete
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\pages\Dashboard.jsx
+========================================
+import { useEffect, useState } from "react";
+import api from "../services/api";
+
+export default function Dashboard() {
+  const [stats, setStats] = useState({ categories:0, items:0, specials:0 });
+
+  useEffect(() => {
+    async function load() {
+      const cat = await api.get("categories/");
+      const menu = await api.get("menu/");
+      setStats({
+        categories: cat.data.length,
+        items: menu.data.length,
+        specials: menu.data.filter(i => i.is_special).length
+      });
+    }
+    load();
+  }, []);
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-3xl font-serif text-[var(--gold)]">Dashboard Overview</h1>
+
+      <div className="grid md:grid-cols-3 gap-6">
+        <div className="card">
+          <p className="text-[var(--muted-text)] text-sm">Categories</p>
+          <p className="text-4xl font-serif">{stats.categories}</p>
+        </div>
+
+        <div className="card">
+          <p className="text-[var(--muted-text)] text-sm">Menu Items</p>
+          <p className="text-4xl font-serif">{stats.items}</p>
+        </div>
+
+        <div className="card">
+          <p className="text-[var(--muted-text)] text-sm">Specials</p>
+          <p className="text-4xl font-serif">{stats.specials}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\pages\EditMenuItem.jsx
+========================================
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import api from "../services/api";
+import LoadingSpinner from "../components/LoadingSpinner";
+
+export default function EditMenuItem() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [item, setItem] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const itemRes = await api.get(`menu/${id}/`);
+        const catRes = await api.get("categories/");
+
+        setItem(itemRes.data);
+        setCategories(catRes.data);
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        setLoading(false);
+      }
+    }
+    load();
+  }, [id]);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("name", item.name);
+    formData.append("description", item.description);
+    formData.append("price", item.price);
+    formData.append("category", item.category);
+    if (image) formData.append("image", image);
+
+    try {
+      await api.put(`menu/${id}/`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      navigate("/menu-items");
+    } catch (err) {
+      console.error(err);
+      alert("Update failed");
+    }
+  }
+
+  if (loading) return <LoadingSpinner />;
+
+  return (
+    <div className="max-w-2xl mx-auto">
+      <div className="card">
+        <h2 className="text-2xl font-serif text-[var(--gold)] mb-4">
+          Edit Menu Item
+        </h2>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+
+          {/* Item Name */}
+          <div>
+            <label className="text-[var(--muted-text)] text-sm mb-1 block">
+              Name
+            </label>
+            <input
+              value={item.name}
+              onChange={(e) => setItem({ ...item, name: e.target.value })}
+              className="w-full"
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="text-[var(--muted-text)] text-sm mb-1 block">
+              Description
+            </label>
+            <textarea
+              value={item.description}
+              onChange={(e) => setItem({ ...item, description: e.target.value })}
+              rows="3"
+              className="w-full"
+            />
+          </div>
+
+          {/* Price */}
+          <div>
+            <label className="text-[var(--muted-text)] text-sm mb-1 block">
+              Price
+            </label>
+            <input
+              type="number"
+              value={item.price}
+              onChange={(e) => setItem({ ...item, price: e.target.value })}
+              className="w-full"
+            />
+          </div>
+
+          {/* Category */}
+          <div>
+            <label className="text-[var(--muted-text)] text-sm mb-1 block">
+              Category
+            </label>
+            <select
+              value={item.category}
+              onChange={(e) => setItem({ ...item, category: e.target.value })}
+              className="w-full"
+            >
+              <option value="">Select category</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Image Upload */}
+          <div>
+            <label className="text-[var(--muted-text)] text-sm mb-1 block">
+              Image
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              className="w-full"
+              onChange={(e) => setImage(e.target.files[0])}
+            />
+          </div>
+
+          {/* Update Button */}
+          <div>
+            <button className="btn-primary w-full">Update Item</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  );
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\pages\Landing.jsx
+========================================
+import { Link } from "react-router-dom";
+
+export default function Landing() {
+  return (
+    <div className="min-h-[85vh] flex items-center justify-center px-4">
+      <div className="grid md:grid-cols-2 gap-10 items-center max-w-6xl">
+        
+        {/* LEFT SECTION */}
+        <div>
+          <h1 className="text-5xl font-serif mb-4 text-[var(--gold)]">
+            Welcome to Royal Dine
+          </h1>
+
+          <p className="text-[var(--muted-text)] mb-6 text-lg">
+            A premium restaurant experience — managed with a modern digital dashboard.
+            Explore menu items, specials, and track analytics effortlessly.
+          </p>
+
+          {/* BUTTONS */}
+          <div className="flex gap-4">
+
+            {/* Only user buttons here */}
+            <Link to="/menu" className="btn-primary">
+              View Menu
+            </Link>
+
+          </div>
+        </div>
+
+        {/* RIGHT IMAGE */}
+        <div>
+          <img 
+            src="/src/assets/restaurant-hero.jpg"
+            className="rounded-xl shadow-lg opacity-90"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\pages\Login.jsx
+========================================
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../services/api";
+
+export default function AdminLogin({ setAdmin }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const res = await api.post("admin/login/", { email, password });
+
+      console.log("ADMIN LOGIN RESPONSE:", res.data);
+
+      if (res.data.is_staff) {
+        setAdmin(res.data);
+        navigate("/dashboard");
+      } else {
+        setError("Not an admin account.");
+      }
+
+    } catch (err) {
+      setError("Invalid credentials.");
+    }
+  }
+
+  return (
+    <div className="min-h-[70vh] flex items-center justify-center px-4">
+      <div className="card w-full max-w-md">
+
+        <h2 className="text-2xl font-serif text-[var(--gold)] mb-4 text-center">
+          Admin Login
+        </h2>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="text-[var(--muted-text)] text-sm mb-1 block">Email</label>
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@gmail.com"
+              className="w-full"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-[var(--muted-text)] text-sm mb-1 block">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full"
+              required
+            />
+          </div>
+
+          <button className="btn-primary w-full">Login</button>
+
+          {error && <div className="text-[var(--danger)] text-sm text-center">{error}</div>}
+        </form>
+      </div>
+    </div>
+  );
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\pages\MenuItems.jsx
+========================================
+import { useEffect, useState } from "react";
+import api from "../services/api";
+import { Link } from "react-router-dom";
+import LoadingSpinner from "../components/LoadingSpinner";
+
+export default function MenuItems() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  function load() {
+    api
+      .get("menu/")
+      .then((res) => {
+        setItems(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  async function handleDelete(id) {
+    if (!confirm("Delete this item?")) return;
+    try {
+      await api.delete(`menu/${id}/`);
+      load();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function toggleSpecial(id) {
+    try {
+      await api.post(`menu/${id}/toggle-special/`);
+      load();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  if (loading) return <LoadingSpinner />;
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-serif text-[var(--gold)]">
+          Menu Items
+        </h1>
+        <Link to="/add-menu-item" className="btn-primary">
+          Add Item
+        </Link>
+      </div>
+
+      {/* Items Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {items.map((i) => (
+          <div key={i.id} className="card">
+            {/* Title + Category */}
+            <div className="mb-3">
+              <div className="text-xl font-serif">{i.name}</div>
+              <div className="text-[var(--muted-text)] text-sm">
+                {i.category_name}
+              </div>
+            </div>
+
+            {/* Price */}
+            <div className="text-[var(--gold)] font-semibold mb-3">
+              Rs. {i.price}
+            </div>
+
+            {/* Image */}
+            <div className="w-full h-40 bg-[#2A2622] rounded overflow-hidden flex items-center justify-center mb-4">
+              {i.image ? (
+                <img
+                  src={i.image}
+                  alt={i.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-[var(--muted-text)]">No Image</span>
+              )}
+            </div>
+
+            {/* Special Badge */}
+            {i.is_special && (
+              <div className="inline-block mb-3 px-2 py-1 bg-[var(--gold)] text-[var(--dark-bg)] text-xs rounded">
+                SPECIAL ITEM
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex gap-2">
+              <Link
+                to={`/edit-menu-item/${i.id}`}
+                className="px-3 py-1 border border-[var(--gold)] text-[var(--warm-text)] rounded hover:bg-[#2A2622]">
+                Edit
+              </Link>
+
+              <button
+                onClick={() => toggleSpecial(i.id)}
+                className="px-3 py-1 bg-[var(--gold)] text-[var(--dark-bg)] rounded">
+                {i.is_special ? "Unmark" : "Mark"}
+              </button>
+
+              <button
+                onClick={() => handleDelete(i.id)}
+                className="btn-danger">
+                Delete
+              </button>
+            </div>
+
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\pages\Specials.jsx
+========================================
+import { useEffect, useState } from "react";
+import api from "../services/api";
+import LoadingSpinner from "../components/LoadingSpinner";
+
+export default function Specials() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api
+      .get("menu/")
+      .then((res) => {
+        setItems(res.data.filter((i) => i.is_special));
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <LoadingSpinner />;
+
+  return (
+    <div>
+      {/* Page Heading */}
+      <h1 className="text-3xl font-serif text-[var(--gold)] mb-6">
+        Today's Specials
+      </h1>
+
+      {/* Specials Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {items.map((i) => (
+          <div key={i.id} className="card">
+
+            {/* Name & Category */}
+            <div className="mb-3">
+              <div className="text-xl font-serif">{i.name}</div>
+              <div className="text-[var(--muted-text)] text-sm">
+                {i.category_name}
+              </div>
+            </div>
+
+            {/* Price */}
+            <div className="text-[var(--gold)] font-semibold mb-3">
+              Rs. {i.price}
+            </div>
+
+            {/* Special Badge */}
+            <div className="inline-block px-2 py-1 bg-[var(--gold)] text-[var(--dark-bg)] text-xs rounded">
+              SPECIAL ITEM
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\services\api.js
+========================================
+import axios from "axios";
+
+const api = axios.create({
+  baseURL: "http://127.0.0.1:8000/api/",
+  withCredentials: true,
+});
+
+// ---- CSRF Interceptor (keep as is if already present) ----
+api.interceptors.request.use((config) => {
+  const csrfToken = getCookie("csrftoken");
+  if (csrfToken) {
+    config.headers["X-CSRFToken"] = csrfToken;
+  }
+  return config;
+});
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+
+    for (let cookie of cookies) {
+      const trimmed = cookie.trim();
+      if (trimmed.startsWith(name + "=")) {
+        cookieValue = trimmed.substring(name.length + 1);
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+// ---- TOKEN AUTH — THIS IS WHAT YOU WERE MISSING ----
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers["Authorization"] = `Token ${token}`;
+  }
+  return config;
+});
+
+export default api;
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\services\auth.js
+========================================
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\user\Cart.jsx
+========================================
+import { useNavigate } from "react-router-dom";
+import { useCart } from "../context/CartContext";
+
+export default function Cart() {
+  const { cart, removeFromCart } = useCart();
+  const navigate = useNavigate();
+
+  const total = cart.reduce(
+    (sum, item) =>
+      sum + parseFloat(item.menu_item_detail.price) * item.quantity,
+    0
+  );
+
+  return (
+    <div>
+      <h1 className="text-3xl font-serif text-[var(--gold)] mb-6">Your Cart</h1>
+
+      {cart.length === 0 && (
+        <div className="text-[var(--muted-text)]">Your cart is empty.</div>
+      )}
+
+      <div className="grid gap-4">
+        {cart.map((ci) => (
+          <div key={ci.id} className="card flex justify-between items-center">
+            <div>
+              <div className="font-medium">{ci.menu_item_detail.name}</div>
+              <div className="text-[var(--muted-text)] text-sm">
+                Rs. {ci.menu_item_detail.price}
+              </div>
+              <div className="text-sm">Qty: {ci.quantity}</div>
+            </div>
+
+            <button
+              className="btn-danger"
+              onClick={() => removeFromCart(ci.menu_item)}
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {cart.length > 0 && (
+        <div className="card mt-6">
+          <div className="flex justify-between">
+            <span className="text-lg">Total</span>
+            <span className="text-xl text-[var(--gold)]">{total.toFixed(2)}</span>
+          </div>
+
+          <button
+            className="btn-primary w-full mt-4"
+            onClick={() => navigate("/checkout")}
+          >
+            Proceed to Checkout
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\user\Checkout.jsx
+========================================
+import { useState } from "react";
+import api from "../services/api";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "../context/CartContext";
+
+export default function Checkout() {
+  const { cart, reload } = useCart();
+  const navigate = useNavigate();
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [err, setErr] = useState("");
+
+  const total = cart.reduce(
+    (sum, item) =>
+      sum + parseFloat(item.menu_item_detail.price) * item.quantity,
+    0
+  );
+
+  async function handleOrder(e) {
+    e.preventDefault();
+    setErr("");
+
+    try {
+      const res = await api.post("orders/", {
+        name,
+        email,
+        phone,
+        address,
+      });
+
+      reload();
+      navigate(`/order-success/${res.data.id}`);
+    } catch (error) {
+      setErr("Failed to place order");
+    }
+  }
+
+  return (
+    <div>
+      <h1 className="text-3xl font-serif text-[var(--gold)] mb-6">Checkout</h1>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <form className="card" onSubmit={handleOrder}>
+          <label className="text-[var(--muted-text)] text-sm">Name</label>
+          <input value={name} onChange={(e) => setName(e.target.value)} required />
+
+          <label className="text-[var(--muted-text)] text-sm">Email</label>
+          <input value={email} onChange={(e) => setEmail(e.target.value)} required />
+
+          <label className="text-[var(--muted-text)] text-sm">Phone</label>
+          <input value={phone} onChange={(e) => setPhone(e.target.value)} />
+
+          <label className="text-[var(--muted-text)] text-sm">Address</label>
+          <textarea
+            className="w-full"
+            rows="3"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+          />
+
+          <button className="btn-primary w-full mt-4">
+            Place Order – Rs. {total.toFixed(2)}
+          </button>
+
+          {err && <div className="text-[var(--danger)] mt-2">{err}</div>}
+        </form>
+
+        <div className="card">
+          <h3 className="font-medium mb-3">Order Summary</h3>
+
+          {cart.map((ci) => (
+            <div key={ci.id} className="flex justify-between mb-2">
+              <div>
+                {ci.menu_item_detail.name} × {ci.quantity}
+              </div>
+              <div>
+                Rs.{" "}
+                {(
+                  parseFloat(ci.menu_item_detail.price) * ci.quantity
+                ).toFixed(2)}
+              </div>
+            </div>
+          ))}
+
+          <div className="flex justify-between mt-4 text-lg">
+            <span>Total</span>
+            <span className="text-[var(--gold)]">
+              Rs. {total.toFixed(2)}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\user\OrderHistory.jsx
+========================================
+import { useEffect, useState } from "react";
+import api from "../services/api";
+import LoadingSpinner from "../components/LoadingSpinner";
+
+export default function OrderHistory() {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api
+      .get("orders/list/")
+      .then((res) => {
+        setOrders(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <LoadingSpinner />;
+
+  return (
+    <div>
+      <h1 className="text-3xl font-serif text-[var(--gold)] mb-6">
+        Order History
+      </h1>
+
+      {orders.length === 0 && (
+        <div className="text-[var(--muted-text)]">
+          You have not placed any orders yet.
+        </div>
+      )}
+
+      <div className="grid gap-4">
+        {orders.map((order) => (
+          <div key={order.id} className="card">
+            <div className="flex justify-between">
+              <div>
+                <div className="text-lg font-serif mb-1">
+                  Order #{order.id}
+                </div>
+                <div className="text-[var(--muted-text)] text-sm">
+                  {new Date(order.created_at).toLocaleString()}
+                </div>
+              </div>
+
+              <div>
+                <span
+                  className="px-2 py-1 text-xs rounded"
+                  style={{
+                    background: "var(--gold)",
+                    color: "var(--dark-bg)",
+                  }}
+                >
+                  COMPLETED
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-3 text-sm">
+              <div className="flex justify-between">
+                <span>Total Items:</span>
+                <span>{order.items.length}</span>
+              </div>
+
+              <div className="flex justify-between mt-1">
+                <span>Total Amount:</span>
+                <span className="text-[var(--gold)]">
+                  Rs.{" "}
+                  {order.items
+                    .reduce(
+                      (sum, i) =>
+                        sum +
+                        parseFloat(i.menu_item_detail.price) * i.quantity,
+                      0
+                    )
+                    .toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+========================================
+import { useEffect, useState } from "react";
+import api from "../services/api";
+import { useParams, Link } from "react-router-dom";
+import LoadingSpinner from "../components/LoadingSpinner";
+
+export default function OrderSuccess() {
+  const { id } = useParams();
+  const [order, setOrder] = useState(null);
+
+  useEffect(() => {
+    api.get("orders/list/").then((res) => {
+      const found = res.data.find((o) => o.id === parseInt(id));
+      setOrder(found);
+    });
+  }, [id]);
+
+  if (!order) return <LoadingSpinner />;
+
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center px-4">
+      <div className="card max-w-md text-center">
+        <h2 className="text-2xl font-serif text-[var(--gold)] mb-3">
+          Order Confirmed!
+        </h2>
+
+        <p className="text-[var(--muted-text)]">
+          Order #{order.id} placed on{" "}
+          {new Date(order.created_at).toLocaleString()}
+        </p>
+
+        <Link to="/menu" className="btn-primary mt-4 inline-block">
+          Back to Menu
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\user\UserLogin.jsx
+========================================
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../services/api";
+
+export default function UserLogin({ setUser }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const res = await api.post("user/login/", { email, password });
+
+      // STEP 3 — Store token in localStorage
+      localStorage.setItem("token", res.data.token);
+
+      // Store user in state
+      setUser(res.data.user);
+
+      navigate("/menu");
+    } catch (err) {
+      setError(err.response?.data?.detail || "Login failed");
+    }
+  }
+
+  return (
+    <div className="max-w-md mx-auto card p-6">
+      <h2 className="text-xl mb-4">User Login</h2>
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <input 
+          value={email} 
+          onChange={e => setEmail(e.target.value)} 
+          placeholder="Email" 
+        />
+
+        <input 
+          value={password} 
+          onChange={e => setPassword(e.target.value)} 
+          type="password" 
+          placeholder="Password" 
+        />
+
+        <button className="btn-primary">Login</button>
+
+        {error && <div className="text-red-500">{error}</div>}
+      </form>
+    </div>
+  );
+}
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\user\UserMenu.jsx
+========================================
+import { useEffect, useState } from "react";
+import api from "../services/api";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { useCart } from "../context/CartContext";
+
+export default function UserMenu() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const { addToCart } = useCart();
+
+  useEffect(() => {
+    api.get("menu/")
+      .then((res) => {
+        setItems(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <LoadingSpinner />;
+
+  return (
+    <div>
+      <h1 className="text-3xl font-serif text-[var(--gold)] mb-6">Menu</h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {items.map((item) => (
+          <div key={item.id} className="card">
+
+            {/* Name & Category */}
+            <div className="text-xl font-serif mb-1">{item.name}</div>
+            <div className="text-[var(--muted-text)] text-sm">{item.category_name}</div>
+
+            {/* Image Block (ADDED NOW) */}
+            <div className="w-full h-40 bg-[#2A2622] rounded overflow-hidden flex items-center justify-center my-4">
+              {item.image ? (
+                <img
+                  src={
+                    item.image.startsWith("http")
+                      ? item.image
+                      : `http://127.0.0.1:8000${item.image}`
+                  }
+                  alt={item.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-[var(--muted-text)]">No Image</span>
+              )}
+            </div>
+
+            {/* Price */}
+            <div className="text-[var(--gold)] font-semibold">
+              Rs. {item.price}
+            </div>
+
+            {/* Add to Cart */}
+            <button
+  className="btn-primary mt-4"
+  onClick={() => {
+    console.log("Add to Cart clicked → item ID:", item.id); // 🔥 console log
+    addToCart(item.id, 1);
+  }}
+>
+  Add to Cart
+</button>
+
+
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+
+========================================
+FILE: C:\Users\DUNYA TRADER\Desktop\RestaurantMenuSystem\frontend\src\user\UserRegister.jsx
+========================================
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../services/api";
+
+export default function UserRegister() {
+  const [full_name, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+    try {
+      await api.post("user/register/", { full_name, email, password });
+      navigate("/user-login");
+    } catch (err) {
+      setError(JSON.stringify(err.response?.data || err.message));
+    }
+  }
+
+  return (
+    <div className="max-w-md mx-auto card p-6">
+      <h2 className="text-xl mb-4">Register</h2>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <input value={full_name} onChange={e=>setFullName(e.target.value)} placeholder="Full name" />
+        <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" />
+        <input value={password} onChange={e=>setPassword(e.target.value)} type="password" placeholder="Password" />
+        <button className="btn-primary">Register</button>
+        {error && <div className="text-red-500">{error}</div>}
+      </form>
+    </div>
+  );
+}
+
+
+

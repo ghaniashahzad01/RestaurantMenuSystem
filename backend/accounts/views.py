@@ -33,6 +33,8 @@ class RegisterView(APIView):
 
 
 # LOGIN
+from rest_framework.authtoken.models import Token
+
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -41,11 +43,19 @@ class LoginView(APIView):
         password = request.data.get("password")
 
         user = authenticate(request, username=email, password=password)
-        if user:
-            login(request, user)
-            return Response(UserSerializer(user).data, status=200)
+        if not user:
+            return Response({"detail": "Invalid credentials"}, status=400)
 
-        return Response({"detail": "Invalid credentials"}, status=400)
+        # Create or get token
+        token, _ = Token.objects.get_or_create(user=user)
+
+        return Response({
+            "token": token.key,
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.full_name,
+            "is_staff": user.is_staff
+        })
 
 
 

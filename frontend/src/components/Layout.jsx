@@ -1,13 +1,19 @@
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 
-export default function Layout({ children, user, setUser }) {
+export default function Layout({ children, user, setUser, admin }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar user={user} setUser={setUser} />
+
+      {/* Navbar always visible */}
+      <Navbar user={user} setUser={setUser} admin={admin} />
 
       <div className="flex flex-1">
-        <Sidebar />
+
+        {/* SHOW SIDEBAR ONLY IF ADMIN IS LOGGED IN */}
+        {admin && <Sidebar />}
+
+        {/* Main content always visible */}
         <main className="flex-1 p-6">
           {children}
         </main>

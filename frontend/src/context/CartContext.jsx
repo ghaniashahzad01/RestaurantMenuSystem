@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
 const CartContext = createContext();
@@ -9,6 +10,7 @@ export function useCart() {
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
+  const navigate = useNavigate();   // ⭐ Required to redirect to cart
 
   useEffect(() => {
     loadCart();
@@ -23,32 +25,47 @@ export function CartProvider({ children }) {
     }
   }
 
-  async function addToCart(menu_item, quantity = 1) {
+  // ⭐ UPDATED addToCart — add item + go to cart page
+  async function addToCart(menu_item_id, quantity = 1) {
     try {
-      await api.post("user/cart/add/", { item_id: menu_item, quantity });
-      loadCart();
+      const exists = cart.some((item) => item.menu_item === menu_item_id);
+
+      if (exists) {
+        console.log("Item already in cart");
+        navigate("/cart");    // ⭐ Redirect if item already exists
+        return;
+      }
+
+      await api.post("user/cart/add/", {
+        item_id: menu_item_id,
+        quantity,
+      });
+
+      await loadCart();
+
+      navigate("/cart");      // ⭐ Redirect after adding item
+
     } catch (err) {
       console.error("Failed to add:", err);
     }
   }
 
-  async function removeFromCart(menu_item) {
+  async function removeFromCart(menu_item_id) {
     try {
-      await api.post("user/cart/remove/", { item_id: menu_item });
+      await api.post("user/cart/remove/", {
+        item_id: menu_item_id,
+      });
       loadCart();
     } catch (err) {
       console.error("Failed to remove:", err);
     }
   }
 
-  const value = {
-    cart,
-    addToCart,
-    removeFromCart,
-    reload: loadCart,
-  };
-
   return (
-    <CartContext.Provider value={value}>{children}</CartContext.Provider>
+    <CartContext.Provider
+      value={{ cart, addToCart, removeFromCart, reload: loadCart }}
+    >
+      {children}
+    </CartContext.Provider>
   );
 }

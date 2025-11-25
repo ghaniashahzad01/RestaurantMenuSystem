@@ -11,10 +11,14 @@ export default function UserLogin({ setUser }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+
     try {
       const res = await api.post("user/login/", { email, password });
-      setUser(res.data); // backend returns serialized user
-      // optional: fetch /api/user/me/ to confirm
+
+      localStorage.setItem("token", res.data.token);
+setUser(res.data.user);
+
+
       navigate("/menu");
     } catch (err) {
       setError(err.response?.data?.detail || "Login failed");
@@ -24,10 +28,23 @@ export default function UserLogin({ setUser }) {
   return (
     <div className="max-w-md mx-auto card p-6">
       <h2 className="text-xl mb-4">User Login</h2>
+
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" />
-        <input value={password} onChange={e=>setPassword(e.target.value)} type="password" placeholder="Password" />
+        <input 
+          value={email} 
+          onChange={e => setEmail(e.target.value)} 
+          placeholder="Email" 
+        />
+
+        <input 
+          value={password} 
+          onChange={e => setPassword(e.target.value)} 
+          type="password" 
+          placeholder="Password" 
+        />
+
         <button className="btn-primary">Login</button>
+
         {error && <div className="text-red-500">{error}</div>}
       </form>
     </div>
