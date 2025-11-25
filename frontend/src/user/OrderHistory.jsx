@@ -8,7 +8,7 @@ export default function OrderHistory() {
 
   useEffect(() => {
     api
-      .get("orders/list/")
+      .get("user/orders/list/")   // ✅ Correct endpoint
       .then((res) => {
         setOrders(res.data);
         setLoading(false);
@@ -34,19 +34,23 @@ export default function OrderHistory() {
       )}
 
       <div className="grid gap-4">
-        {orders.map((order) => (
-          <div key={order.id} className="card">
-            <div className="flex justify-between">
-              <div>
-                <div className="text-lg font-serif mb-1">
-                  Order #{order.id}
-                </div>
-                <div className="text-[var(--muted-text)] text-sm">
-                  {new Date(order.created_at).toLocaleString()}
-                </div>
-              </div>
+        {orders.map((order) => {
+          const totalAmount = order.items.reduce((sum, item) => {
+            return sum + item.unit_price * item.quantity;  // ✅ Correct fields from OrderSerializer
+          }, 0);
 
-              <div>
+          return (
+            <div key={order.id} className="card">
+              <div className="flex justify-between items-center">
+                <div>
+                  <div className="text-lg font-serif mb-1">
+                    Order #{order.id}
+                  </div>
+                  <div className="text-[var(--muted-text)] text-sm">
+                    {new Date(order.created_at).toLocaleString()}
+                  </div>
+                </div>
+
                 <span
                   className="px-2 py-1 text-xs rounded"
                   style={{
@@ -57,31 +61,23 @@ export default function OrderHistory() {
                   COMPLETED
                 </span>
               </div>
-            </div>
 
-            <div className="mt-3 text-sm">
-              <div className="flex justify-between">
-                <span>Total Items:</span>
-                <span>{order.items.length}</span>
-              </div>
+              <div className="mt-3 text-sm">
+                <div className="flex justify-between">
+                  <span>Total Items:</span>
+                  <span>{order.items.length}</span>
+                </div>
 
-              <div className="flex justify-between mt-1">
-                <span>Total Amount:</span>
-                <span className="text-[var(--gold)]">
-                  Rs.{" "}
-                  {order.items
-                    .reduce(
-                      (sum, i) =>
-                        sum +
-                        parseFloat(i.menu_item_detail.price) * i.quantity,
-                      0
-                    )
-                    .toFixed(2)}
-                </span>
+                <div className="flex justify-between mt-1">
+                  <span>Total Amount:</span>
+                  <span className="text-[var(--gold)]">
+                    Rs. {totalAmount.toFixed(2)}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
