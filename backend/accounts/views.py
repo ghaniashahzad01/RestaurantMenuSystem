@@ -1,10 +1,11 @@
-# backend/accounts/views.py
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+
+from rest_framework.authtoken.models import Token
 
 # Serializers
 from .serializers import (
@@ -31,10 +32,7 @@ class RegisterView(APIView):
         return Response(ser.errors, status=400)
 
 
-
 # LOGIN
-from rest_framework.authtoken.models import Token
-
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -43,10 +41,10 @@ class LoginView(APIView):
         password = request.data.get("password")
 
         user = authenticate(request, username=email, password=password)
+
         if not user:
             return Response({"detail": "Invalid credentials"}, status=400)
 
-        # Create or get token
         token, _ = Token.objects.get_or_create(user=user)
 
         return Response({
@@ -58,7 +56,6 @@ class LoginView(APIView):
         })
 
 
-
 # LOGOUT
 class LogoutView(APIView):
     def post(self, request):
@@ -66,7 +63,7 @@ class LogoutView(APIView):
         return Response({"detail": "Logged out"})
 
 
-# CURRENT USER DATA
+# CURRENT USER
 class MeView(APIView):
     def get(self, request):
         if not request.user.is_authenticated:
@@ -74,7 +71,7 @@ class MeView(APIView):
         return Response(UserSerializer(request.user).data)
 
 
-# CART VIEW -> returns list of CartItem for this user
+# GET CART ITEMS
 class CartView(APIView):
     def get(self, request):
         if not request.user.is_authenticated:
@@ -122,6 +119,30 @@ class CartRemoveView(APIView):
         return Response({"detail": "removed"})
 
 
+# ⭐ NEW — UPDATE QUANTITY
+class CartUpdateView(APIView):
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return Response({"detail": "Login required"}, status=401)
+
+        item_id = request.data.get("item_id")
+        quantity = int(request.data.get("quantity", 1))
+
+        if quantity < 1:
+            return Response({"detail": "Invalid quantity"}, status=400)
+
+        cart_item = get_object_or_404(
+            CartItem,
+            cart__user=request.user,
+            menu_item__id=item_id
+        )
+
+        cart_item.quantity = quantity
+        cart_item.save()
+
+        return Response({"detail": "updated"}, status=200)
+
+
 # CREATE ORDER
 class OrderCreateView(APIView):
     def post(self, request):
@@ -138,8 +159,13 @@ class OrderCreateView(APIView):
         if not cart_items.exists():
             return Response({"detail": "Cart empty"}, status=400)
 
+        # Create order manually (your model style)
         order = Order.objects.create(
-            user=user, name=name, email=email, phone=phone, address=address
+            user=user,
+            name=name,
+            email=email,
+            phone=phone,
+            address=address
         )
 
         total = 0
@@ -156,13 +182,13 @@ class OrderCreateView(APIView):
         order.total = total
         order.save()
 
-        # clear user's cart items
         cart_items.delete()
 
         return Response(OrderSerializer(order).data, status=201)
 
 
-# USER ORDERS LIST
+
+# USER ORDER LIST
 class OrderListView(APIView):
     def get(self, request):
         if not request.user.is_authenticated:

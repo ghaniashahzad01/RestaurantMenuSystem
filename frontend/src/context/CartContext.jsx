@@ -10,7 +10,7 @@ export function useCart() {
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
-  const navigate = useNavigate();   // ⭐ Required to redirect to cart
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadCart();
@@ -25,14 +25,13 @@ export function CartProvider({ children }) {
     }
   }
 
-  // ⭐ UPDATED addToCart — add item + go to cart page
+  // ⭐ ADD ITEM + REDIRECT
   async function addToCart(menu_item_id, quantity = 1) {
     try {
       const exists = cart.some((item) => item.menu_item === menu_item_id);
 
       if (exists) {
-        console.log("Item already in cart");
-        navigate("/cart");    // ⭐ Redirect if item already exists
+        navigate("/cart");
         return;
       }
 
@@ -42,11 +41,27 @@ export function CartProvider({ children }) {
       });
 
       await loadCart();
-
-      navigate("/cart");      // ⭐ Redirect after adding item
+      navigate("/cart");
 
     } catch (err) {
       console.error("Failed to add:", err);
+    }
+  }
+
+  // ⭐ NEW — UPDATE QUANTITY (+ / -)
+  async function updateQuantity(menu_item_id, quantity) {
+    if (quantity < 1) return; // STOP below 1
+
+    try {
+      await api.post("user/cart/update/", {
+        item_id: menu_item_id,
+        quantity,
+      });
+
+      await loadCart();
+
+    } catch (err) {
+      console.error("Failed to update quantity:", err);
     }
   }
 
@@ -63,7 +78,13 @@ export function CartProvider({ children }) {
 
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, removeFromCart, reload: loadCart }}
+      value={{
+        cart,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        reload: loadCart,
+      }}
     >
       {children}
     </CartContext.Provider>
