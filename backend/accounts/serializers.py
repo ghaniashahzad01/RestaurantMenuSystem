@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 
 from .models import Cart, CartItem, Order, OrderItem
 from foodordering.serializers import MenuItemSerializer
+from .models import AdminNotification
 
 User = get_user_model()
 
@@ -76,3 +77,9 @@ class OrderSerializer(serializers.ModelSerializer):
             "address",
             "items",
         ]
+
+
+class AdminNotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AdminNotification
+        fields = "__all__"

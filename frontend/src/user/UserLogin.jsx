@@ -16,8 +16,13 @@ export default function UserLogin({ setUser }) {
       const res = await api.post("user/login/", { email, password });
 
       localStorage.setItem("token", res.data.token);
-      setUser(res.data.user);
 
+      setUser({
+        id: res.data.id,
+        email: res.data.email,
+        full_name: res.data.full_name,
+        is_staff: res.data.is_staff
+      });
 
       navigate("/menu");
     } catch (err) {

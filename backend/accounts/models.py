@@ -1,4 +1,3 @@
-# backend/accounts/models.py
 from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser, BaseUserManager, PermissionsMixin
@@ -6,9 +5,7 @@ from django.contrib.auth.models import (
 from django.utils import timezone
 from django.conf import settings
 
-# -------------------------
-# Custom User Manager
-# -------------------------
+# USER MANAGER
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, full_name="", **extra_fields):
         if not email:
@@ -22,16 +19,10 @@ class CustomUserManager(BaseUserManager):
     def create_superuser(self, email, password=None, full_name="", **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
-
-        if extra_fields.get("is_staff") is not True:
-            raise ValueError("Superuser must have is_staff=True.")
-
         return self.create_user(email, password, full_name=full_name, **extra_fields)
 
 
-# -------------------------
-# Custom User
-# -------------------------
+# CUSTOM USER
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=255, blank=True)
@@ -44,47 +35,37 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
 
     def __str__(self):
         return self.email
 
 
-# Use settings.AUTH_USER_MODEL for relationships below
 User = settings.AUTH_USER_MODEL
 
 
-# -------------------------
-# CART (one per user)
-# -------------------------
+# CART
 class Cart(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="cart")
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        # avoid attribute access on string ref when printing in some contexts
         return f"Cart - {self.user}"
 
 
-# -------------------------
-# CART ITEM (many inside cart)
-# -------------------------
+# CART ITEM
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
-    # use string reference to avoid circular import
     menu_item = models.ForeignKey("foodordering.MenuItem", on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
 
     class Meta:
-        unique_together = ('cart', 'menu_item')
+        unique_together = ("cart", "menu_item")
 
     def __str__(self):
         return f"{self.menu_item.name} x {self.quantity}"
 
 
-# -------------------------
 # ORDER
-# -------------------------
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -95,13 +76,14 @@ class Order(models.Model):
     phone = models.CharField(max_length=100, blank=True)
     address = models.TextField(blank=True)
 
+    # ⭐ NEW FIELD — FIX FOR 500 ERROR ⭐
+    payment_method = models.CharField(max_length=50, default="COD")
+
     def __str__(self):
         return f"Order #{self.id}"
 
 
-# -------------------------
 # ORDER ITEM
-# -------------------------
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
     menu_item = models.ForeignKey("foodordering.MenuItem", on_delete=models.PROTECT)
@@ -110,3 +92,13 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.menu_item.name} ({self.quantity})"
+
+
+# ADMIN NOTIFICATIONS
+class AdminNotification(models.Model):
+    message = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.message

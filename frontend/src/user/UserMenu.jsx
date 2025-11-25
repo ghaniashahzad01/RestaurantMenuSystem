@@ -10,7 +10,8 @@ export default function UserMenu() {
   const { addToCart } = useCart();
 
   useEffect(() => {
-    api.get("menu/")
+    api
+      .get("menu/")
       .then((res) => {
         setItems(res.data);
         setLoading(false);
@@ -31,11 +32,21 @@ export default function UserMenu() {
         {items.map((item) => (
           <div key={item.id} className="card">
 
-            {/* Name & Category */}
-            <div className="text-xl font-serif mb-1">{item.name}</div>
+            {/* ----- TITLE + SPECIAL BADGE ----- */}
+            <div className="flex justify-between items-center mb-1">
+              <div className="text-xl font-serif">{item.name}</div>
+
+              {/* ⭐ SPECIAL BADGE SHOW IF TRUE */}
+              {item.is_special && (
+                <span className="px-2 py-1 text-xs bg-yellow-500 text-black rounded font-semibold">
+                  ⭐ Special
+                </span>
+              )}
+            </div>
+
             <div className="text-[var(--muted-text)] text-sm">{item.category_name}</div>
 
-            {/* Image Block (ADDED NOW) */}
+            {/* ----- IMAGE ----- */}
             <div className="w-full h-40 bg-[#2A2622] rounded overflow-hidden flex items-center justify-center my-4">
               {item.image ? (
                 <img
@@ -52,22 +63,21 @@ export default function UserMenu() {
               )}
             </div>
 
-            {/* Price */}
+            {/* ----- PRICE ----- */}
             <div className="text-[var(--gold)] font-semibold">
               Rs. {item.price}
             </div>
 
-            {/* Add to Cart */}
+            {/* ----- ADD TO CART BUTTON ----- */}
             <button
-  className="btn-primary mt-4"
-  onClick={() => {
-    console.log("Add to Cart clicked → item ID:", item.id); // 🔥 console log
-    addToCart(item.id, 1);
-  }}
->
-  Add to Cart
-</button>
-
+              className="btn-primary mt-4"
+              onClick={() => {
+                console.log("Add to Cart clicked → item ID:", item.id);
+                addToCart(item.id, 1);
+              }}
+            >
+              Add to Cart
+            </button>
 
           </div>
         ))}
