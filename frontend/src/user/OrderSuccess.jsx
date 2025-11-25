@@ -6,15 +6,27 @@ import LoadingSpinner from "../components/LoadingSpinner";
 export default function OrderSuccess() {
   const { id } = useParams();
   const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get("orders/list/").then((res) => {
-      const found = res.data.find((o) => o.id === parseInt(id));
-      setOrder(found);
-    });
+    api.get(`user/orders/${id}/`)
+      .then((res) => {
+        setOrder(res.data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
   }, [id]);
 
-  if (!order) return <LoadingSpinner />;
+  if (loading) return <LoadingSpinner />;
+
+  if (!order)
+    return (
+      <div className="text-center text-[var(--danger)] mt-10">
+        Order not found.
+      </div>
+    );
 
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-4">
@@ -24,7 +36,7 @@ export default function OrderSuccess() {
         </h2>
 
         <p className="text-[var(--muted-text)]">
-          Order #{order.id} placed on{" "}
+          Order #{order.id} was placed on{" "}
           {new Date(order.created_at).toLocaleString()}
         </p>
 

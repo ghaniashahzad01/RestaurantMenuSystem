@@ -196,3 +196,14 @@ class OrderListView(APIView):
 
         orders = Order.objects.filter(user=request.user).order_by("-created_at")
         return Response(OrderSerializer(orders, many=True).data)
+
+
+
+class OrderDetailView(APIView):
+    def get(self, request, id):
+        if not request.user.is_authenticated:
+            return Response({"detail": "Login required"}, status=401)
+
+        order = get_object_or_404(Order, id=id, user=request.user)
+        ser = OrderSerializer(order)
+        return Response(ser.data)

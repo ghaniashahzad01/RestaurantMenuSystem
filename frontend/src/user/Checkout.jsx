@@ -20,78 +20,119 @@ export default function Checkout() {
   );
 
   async function handleOrder(e) {
-    e.preventDefault();
-    setErr("");
+  e.preventDefault();
+  setErr("");
 
-    try {
-      const res = await api.post("orders/", {
-        name,
-        email,
-        phone,
-        address,
-      });
+  try {
+    const res = await api.post("user/orders/", {
+      name,
+      email,
+      phone,
+      address,
+    });
 
-      reload();
-      navigate(`/order-success/${res.data.id}`);
-    } catch (error) {
-      setErr("Failed to place order");
-    }
+    reload();
+    navigate(`/order-success/${res.data.id}`);
+  } catch (error) {
+    setErr("Failed to place order");
   }
+}
+
 
   return (
     <div>
-      <h1 className="text-3xl font-serif text-[var(--gold)] mb-6">Checkout</h1>
+      <h1 className="text-3xl font-serif text-[var(--gold)] mb-8">Checkout</h1>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <form className="card" onSubmit={handleOrder}>
-          <label className="text-[var(--muted-text)] text-sm">Name</label>
-          <input value={name} onChange={(e) => setName(e.target.value)} required />
+      <div className="grid md:grid-cols-2 gap-8">
+        
+        {/* LEFT FORM */}
+        <form className="card p-6 space-y-4 shadow-lg" onSubmit={handleOrder}>
+          <div>
+            <label className="text-[var(--muted-text)] text-sm block mb-1">
+              Name
+            </label>
+            <input
+              className="input w-full"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your full name"
+              required
+            />
+          </div>
 
-          <label className="text-[var(--muted-text)] text-sm">Email</label>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <div>
+            <label className="text-[var(--muted-text)] text-sm block mb-1">
+              Email
+            </label>
+            <input
+              className="input w-full"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+            />
+          </div>
 
-          <label className="text-[var(--muted-text)] text-sm">Phone</label>
-          <input value={phone} onChange={(e) => setPhone(e.target.value)} />
+          <div>
+            <label className="text-[var(--muted-text)] text-sm block mb-1">
+              Phone
+            </label>
+            <input
+              className="input w-full"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Optional"
+            />
+          </div>
 
-          <label className="text-[var(--muted-text)] text-sm">Address</label>
-          <textarea
-            className="w-full"
-            rows="3"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-          />
+          <div>
+            <label className="text-[var(--muted-text)] text-sm block mb-1">
+              Address
+            </label>
+            <textarea
+              className="w-full input"
+              rows="3"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Enter delivery address"
+              required
+            />
+          </div>
 
-          <button className="btn-primary w-full mt-4">
+          <button
+            className="bg-[var(--gold)] text-black py-3 rounded font-semibold tracking-wide text-lg mt-4 hover:opacity-90 transition w-full"
+          >
             Place Order – Rs. {total.toFixed(2)}
           </button>
 
           {err && <div className="text-[var(--danger)] mt-2">{err}</div>}
         </form>
 
-        <div className="card">
-          <h3 className="font-medium mb-3">Order Summary</h3>
+        {/* RIGHT SUMMARY */}
+        <div className="card p-6 shadow-lg">
+          <h3 className="font-semibold mb-4 text-xl">Order Summary</h3>
 
-          {cart.map((ci) => (
-            <div key={ci.id} className="flex justify-between mb-2">
-              <div>
-                {ci.menu_item_detail.name} × {ci.quantity}
+          <div className="space-y-3">
+            {cart.map((ci) => (
+              <div key={ci.id} className="flex justify-between border-b border-[#3a342e] pb-2">
+                <span>
+                  {ci.menu_item_detail.name} × {ci.quantity}
+                </span>
+                <span className="text-[var(--gold)]">
+                  Rs. {(ci.menu_item_detail.price * ci.quantity).toFixed(2)}
+                </span>
               </div>
-              <div>
-                Rs.{" "}
-                {(
-                  parseFloat(ci.menu_item_detail.price) * ci.quantity
-                ).toFixed(2)}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
 
-          <div className="flex justify-between mt-4 text-lg">
+          <div className="flex justify-between mt-6 text-lg font-medium">
             <span>Total</span>
             <span className="text-[var(--gold)]">
               Rs. {total.toFixed(2)}
             </span>
           </div>
         </div>
+
       </div>
     </div>
   );
