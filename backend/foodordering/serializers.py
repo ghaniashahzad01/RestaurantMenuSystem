@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category, MenuItem
+from .models import Category, MenuItem, AdminNotification
 
 
 # ---------- CATEGORY SERIALIZER ----------
@@ -17,8 +17,17 @@ class MenuItemSerializer(serializers.ModelSerializer):
         model = MenuItem
         fields = [
             "id",
-            "name",          # ⭐ REQUIRED
+            "name",         
             "price",
             "image",
             "category_name"
         ]
+
+
+# -------------------------
+# ADMIN NOTIFICATION
+# -------------------------
+class AdminNotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AdminNotification
+        fields = "__all__"

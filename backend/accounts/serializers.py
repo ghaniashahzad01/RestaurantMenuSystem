@@ -3,7 +3,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
-from .models import Cart, CartItem, Order, OrderItem, AdminNotification
+from .models import Cart, CartItem, Order, OrderItem
 from foodordering.serializers import MenuItemSerializer
 
 User = get_user_model()
@@ -85,10 +85,3 @@ class OrderSerializer(serializers.ModelSerializer):
         ]
 
 
-# -------------------------
-# ADMIN NOTIFICATION
-# -------------------------
-class AdminNotificationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AdminNotification
-        fields = "__all__"

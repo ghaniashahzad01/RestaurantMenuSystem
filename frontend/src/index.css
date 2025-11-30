@@ -58,3 +58,63 @@ input, select, textarea {
 input::placeholder, textarea::placeholder {
   color: var(--muted-text);
 }
+
+
+/* ============================
+   ADMIN NAVBAR (THEME MATCHED)
+============================= */
+.admin-navbar {
+  background: var(--dark-card);
+  border-bottom: 1px solid #2f2924;
+  padding: 0.9rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.30);
+}
+
+.admin-navbar .logo {
+  color: var(--gold);
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+}
+
+.admin-navbar nav {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.admin-navbar a {
+  color: var(--warm-text);
+  font-weight: 500;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.admin-navbar a:hover {
+  color: var(--gold);
+}
+
+.admin-navbar .admin-email {
+  color: var(--muted-text);
+  font-size: 0.9rem;
+  margin-left: 1rem;
+}
+
+/* LOGOUT BUTTON */
+.logout-btn {
+  background: var(--danger);
+  color: white;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.logout-btn:hover {
+  opacity: 0.85;
+}

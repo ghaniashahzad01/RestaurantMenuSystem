@@ -6,7 +6,10 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework.authtoken.models import Token
 
-from .models import Cart, CartItem, Order, OrderItem
+from .models import Cart, CartItem, OrderItem
+from accounts.models import Order
+from foodordering.models import AdminNotification
+
 from .serializers import (
     RegisterSerializer, UserSerializer,
     CartItemSerializer, OrderSerializer

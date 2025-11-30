@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 export default function Sidebar() {
+
   const active = (path) =>
     window.location.pathname === path
       ? "bg-[var(--gold)] text-black font-semibold"
@@ -11,11 +12,15 @@ export default function Sidebar() {
       className="hidden md:flex flex-col w-72 min-h-screen p-6 border-r border-[#2A2622]"
       style={{ background: "#14110F" }}
     >
+
+      {/* TITLE */}
       <h2 className="text-2xl font-serif text-[var(--gold)] mb-8">
         Admin Panel
       </h2>
 
+      {/* NAVIGATION */}
       <nav className="flex flex-col gap-2 text-lg">
+
         <Link className={`p-3 rounded-md ${active("/dashboard")}`} to="/dashboard">
           Dashboard
         </Link>
@@ -46,14 +51,23 @@ export default function Sidebar() {
         >
           Notifications
         </Link>
-        <Link to="/admin/orders">Orders</Link>
+
+        {/* ✅ FIXED ORDERS LINK */}
+        <Link
+          className={`p-3 rounded-md ${active("/admin/orders")}`}
+          to="/admin/orders"
+        >
+          Orders
+        </Link>
 
       </nav>
 
+      {/* FOOTER */}
       <div className="mt-auto text-[var(--muted-text)] text-sm pt-6 border-t border-[#2A2622]">
         © {new Date().getFullYear()} Royal Dine <br />
         <span className="text-xs opacity-60">Admin Dashboard</span>
       </div>
+
     </aside>
   );
 }

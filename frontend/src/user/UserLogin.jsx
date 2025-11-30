@@ -15,16 +15,22 @@ export default function UserLogin({ setUser }) {
     try {
       const res = await api.post("user/login/", { email, password });
 
-      localStorage.setItem("token", res.data.token);
-
-      setUser({
+      const userData = {
         id: res.data.id,
         email: res.data.email,
         full_name: res.data.full_name,
         is_staff: res.data.is_staff
-      });
+      };
+
+      // ✅ SAVE CLEAN USER DATA
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("token", res.data.token);
+
+      // ✅ SYNC CONTEXT WITH STORAGE
+      setUser(userData);
 
       navigate("/menu");
+
     } catch (err) {
       setError(err.response?.data?.detail || "Login failed");
     }
@@ -35,17 +41,17 @@ export default function UserLogin({ setUser }) {
       <h2 className="text-xl mb-4">User Login</h2>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <input 
-          value={email} 
-          onChange={e => setEmail(e.target.value)} 
-          placeholder="Email" 
+        <input
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          placeholder="Email"
         />
 
-        <input 
-          value={password} 
-          onChange={e => setPassword(e.target.value)} 
-          type="password" 
-          placeholder="Password" 
+        <input
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          type="password"
+          placeholder="Password"
         />
 
         <button className="btn-primary">Login</button>

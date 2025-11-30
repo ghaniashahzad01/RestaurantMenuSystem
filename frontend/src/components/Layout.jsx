@@ -1,22 +1,27 @@
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
+import Footer from "./Footer";
 
-export default function Layout({ children, user, setUser, admin, setAdmin }) {
+export default function Layout({ children, admin, setAdmin, user, setUser }) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <>
+      <Navbar admin={admin} setAdmin={setAdmin} setUser={setUser} />
 
-      <Navbar 
-        user={user} 
-        setUser={setUser}
-        admin={admin}
-        setAdmin={setAdmin}   // ⭐ FIXED
-      />
-
-      <div className="flex flex-1">
+      <main className="flex min-h-screen">
         {admin && <Sidebar />}
-        <main className="flex-1 p-6">{children}</main>
-      </div>
-    </div>
+
+        <div className="flex-1 flex flex-col">
+          
+          {/* PAGE CONTENT */}
+          <div className="flex-grow p-6">
+            {children}
+          </div>
+
+          {/* ✅ FOOTER FOR BOTH ADMIN & USER */}
+          <Footer />
+
+        </div>
+      </main>
+    </>
   );
 }
-

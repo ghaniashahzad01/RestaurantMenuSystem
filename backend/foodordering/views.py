@@ -2,16 +2,17 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.views import APIView
-from rest_framework.parsers import JSONParser
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.authtoken.models import Token
 from rest_framework import permissions
 
+from accounts.models import Order
+from foodordering.models import AdminNotification
+from accounts.serializers import OrderSerializer
 
 # Admin-side models
 from .models import Category, MenuItem
 from .serializers import CategorySerializer, MenuItemSerializer
-
 
 # ---------------------------------------
 # CATEGORY CRUD
@@ -51,7 +52,7 @@ class ToggleSpecialView(APIView):
 
 
 # ---------------------------------------
-# CATEGORY ANALYTICS (Admin)
+# CATEGORY ANALYTICS
 # ---------------------------------------
 class CategoryAnalyticsView(APIView):
     def get(self, request):
@@ -65,9 +66,12 @@ class CategoryAnalyticsView(APIView):
         return Response(data)
 
 
-
-# ADMIN NOTIFICATION LIST
+# ---------------------------------------
+# ADMIN NOTIFICATION 
+# ---------------------------------------
 class AdminNotificationList(APIView):
+    permission_classes = [IsAdminUser]
+
     def get(self, request):
         notes = AdminNotification.objects.order_by("-created_at")
         return Response([
@@ -80,16 +84,21 @@ class AdminNotificationList(APIView):
         ])
 
 
-#  ADMIN ORDER LIST
+# ---------------------------------------
+# ADMIN ORDER LIST 
+# ---------------------------------------
 class AdminOrderListView(APIView):
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAdminUser]
 
     def get(self, request):
         orders = Order.objects.all().order_by("-created_at")
-        return Response(OrderSerializer(orders, many=True).data)
+        ser = OrderSerializer(orders, many=True)
+        return Response(ser.data)
+
 
 # ---------------------------------------
-# ADMIN LOGIN
+# ADMIN LOGIN 
+# ---------------------------------------
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
@@ -97,15 +106,14 @@ class LoginView(APIView):
         email = request.data.get("email")
         password = request.data.get("password")
 
-        user = authenticate(request, username=email, password=password)
+        user = authenticate(username=email, password=password)
 
         if user and user.is_staff:
             token, _ = Token.objects.get_or_create(user=user)
-
             login(request, user)
 
             return Response({
-                "token": token.key,    # ✅ THIS IS THE FIX
+                "token": token.key,
                 "id": user.id,
                 "email": user.email,
                 "full_name": user.full_name,
@@ -113,7 +121,6 @@ class LoginView(APIView):
             })
 
         return Response({"message": "Invalid admin credentials"}, status=400)
-
 
 
 # ---------------------------------------

@@ -7,7 +7,7 @@ export default function AdminNotifications() {
   useEffect(() => {
     async function loadNotes() {
       try {
-        const res = await api.get("user/admin/notifications/");
+        const res = await api.get("admin/notifications/");
         setNotes(res.data);
       } catch (err) {
         console.log("Error loading notifications", err);

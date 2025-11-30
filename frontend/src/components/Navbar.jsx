@@ -2,126 +2,149 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FaShoppingCart } from "react-icons/fa";
 import api from "../services/api";
 import { useUser } from "../context/UserContext";
+import { toast } from "react-hot-toast";
 
-export default function Navbar({ admin, setUser, setAdmin }) {
+export default function Navbar({ admin, setAdmin, setUser }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useUser();
 
-  // Hide navbar *ONLY* on login/register pages
-  const hideNavbar = [
-    "/user-login",
-    "/register",
-    "/admin-login"
-  ];
+  // ✅ HIDE NAVBAR only on auth pages
+  const hideNavbar = ["/user-login", "/register", "/admin-login"];
 
+  /* ---------------- AUTH SCREENS NAVBAR ---------------- */
   if (hideNavbar.includes(location.pathname)) {
-    return (
-      <header
-        className="w-full shadow-md sticky top-0 z-50"
-        style={{ background: "#1A1714" }}
-      >
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="text-[var(--gold)] text-2xl font-serif">
-            🍽 Royal Dine
-          </Link>
-
-          {/* Show Login + Register on these pages */}
-          <nav className="flex items-center gap-6">
-            <Link className="btn-primary" to="/user-login">Login</Link>
-            <Link className="btn-secondary" to="/register">Register</Link>
-          </nav>
-        </div>
-      </header>
-    );
-  }
-
-  // ============ LOGOUTS ============
-  async function handleUserLogout() {
-    localStorage.removeItem("token");
-    setUser(null);
-    navigate("/user-login", {
-      state: { message: "Logged out successfully." },
-    });
-  }
-
-  async function handleAdminLogout() {
-  try {
-    await api.post("user/logout/");
-    setAdmin(null);
-
-    navigate("/admin-login", {
-      state: { message: "Admin logged out successfully." },
-    });
-  } catch (err) {
-    console.error("ADMIN LOGOUT FAILED:", err);
-  }
-}
-
-
   return (
-    <header
-      className="w-full shadow-md sticky top-0 z-50"
-      style={{ background: "#1A1714" }}
-    >
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+    <header className="bg-[var(--dark-bg)] py-4 px-6 flex justify-between items-center">
 
-        <Link to="/" className="text-[var(--gold)] text-2xl font-serif">
-          🍽 Royal Dine
+      <span
+        onClick={() => toast.error("Please login first")}
+        className="text-[var(--gold)] font-serif text-xl tracking-wide cursor-pointer hover:opacity-80"
+      >
+        🍽 Royal Dine
+      </span>
+
+      <div className="flex gap-3 items-center">
+        <Link
+          className="bg-[var(--gold)] text-black px-4 py-1 rounded hover:opacity-90"
+          to="/user-login"
+        >
+          Login
         </Link>
 
-        <nav className="flex items-center gap-6">
-
-          {/* ======================= ADMIN NAVBAR ======================= */}
-          {admin ? (
-            <>
-              <Link to="/dashboard" className="nav-link">Dashboard</Link>
-              <Link to="/categories" className="nav-link">Categories</Link>
-              <Link to="/menu-items" className="nav-link">Menu Items</Link>
-              <Link to="/analytics" className="nav-link">Analytics</Link>
-
-              <span className="text-[var(--muted-text)]">
-                Admin: <strong>{admin.full_name || admin.email}</strong>
-              </span>
-
-              <button className="btn-danger" onClick={handleAdminLogout}>
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              {/* ======================= USER NAVBAR ======================= */}
-              <Link to="/menu" className="nav-link">Menu</Link>
-
-              {user && (
-                <>
-                  <Link to="/cart" className="nav-link flex items-center gap-1">
-                    <FaShoppingCart size={18} /> Cart
-                  </Link>
-
-                  <Link to="/orders" className="nav-link">My Orders</Link>
-
-                  <span className="text-[var(--muted-text)]">
-                    Hi, <strong>{user.full_name}</strong>
-                  </span>
-
-                  <button className="btn-primary" onClick={handleUserLogout}>
-                    Logout
-                  </button>
-                </>
-              )}
-
-              {!user && (
-                <>
-                  <Link className="btn-primary" to="/user-login">Login</Link>
-                  <Link className="btn-secondary" to="/register">Register</Link>
-                </>
-              )}
-            </>
-          )}
-
-        </nav>
+        <Link
+          className="border border-[var(--gold)] text-[var(--gold)] px-4 py-1 rounded hover:bg-[var(--gold)] hover:text-black transition"
+          to="/register"
+        >
+          Register
+        </Link>
       </div>
+
     </header>
   );
 }
+
+
+  // ✅ USER LOGOUT
+  function handleUserLogout() {
+    localStorage.removeItem("token");
+    setUser(null);
+    navigate("/user-login");
+  }
+
+  // ✅ ADMIN LOGOUT
+  async function handleAdminLogout() {
+    try {
+      await api.post("admin/logout/");
+    } catch {}
+
+    localStorage.removeItem("admin");
+    localStorage.removeItem("token");
+
+    setAdmin(null);
+    navigate("/admin-login");
+  }
+
+  return (
+    <header className="bg-[var(--dark-bg)] px-6 py-4 flex justify-between items-center shadow-md">
+
+      {/* ✅ ADMIN LOGO DOES NOTHING */}
+    {admin ? (
+  <span className="text-[var(--gold)] font-serif text-xl cursor-default">
+    🍽 Royal Dine
+  </span>
+) : user ? (
+  // ✅ user logged in → home allowed
+  <Link
+    to="/"
+    className="text-[var(--gold)] font-serif text-xl hover:opacity-80 transition"
+  >
+    🍽 Royal Dine
+  </Link>
+) : (
+  // ✅ user NOT logged in → toast only
+  <span
+   onClick={() => toast.error("Please login first")}
+
+    className="text-[var(--gold)] font-serif text-xl cursor-pointer hover:opacity-80 transition"
+  >
+    🍽 Royal Dine
+  </span>
+)}
+
+      <nav className="flex gap-4 items-center">
+
+        {/* --------------- ADMIN NAVBAR --------------- */}
+        {admin ? (
+          <>
+            <Link className="text-[var(--gold)] hover:underline" to="/dashboard">Dashboard</Link>
+            <Link className="text-[var(--gold)] hover:underline" to="/categories">Categories</Link>
+            <Link className="text-[var(--gold)] hover:underline" to="/menu-items">Menu Items</Link>
+            <Link className="text-[var(--gold)] hover:underline" to="/analytics">Analytics</Link>
+
+            <span className="text-[var(--muted-text)] text-sm">
+              Admin: <b>{admin.full_name || admin.email}</b>
+            </span>
+
+            <button
+              className="bg-red-600 text-white px-4 py-1 rounded hover:opacity-90"
+              onClick={handleAdminLogout}
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            {/* --------------- USER NAVBAR --------------- */}
+            <Link className="text-[var(--gold)] hover:underline" to="/menu">Menu</Link>
+
+            {user && (
+              <>
+                <Link className="text-[var(--gold)]" to="/cart"><FaShoppingCart /></Link>
+                <Link className="text-[var(--gold)] hover:underline" to="/orders">My Orders</Link>
+
+                <span className="text-[var(--muted-text)]">
+                  Hi, <b>{user.full_name}</b>
+                </span>
+
+                <button
+                  className="bg-[var(--gold)] text-black px-4 py-1 rounded hover:opacity-90"
+                  onClick={handleUserLogout}
+                >
+                  Logout
+                </button>
+              </>
+            )}
+
+            {!user && (
+              <>
+                <Link className="text-[var(--gold)] hover:underline" to="/user-login">Login</Link>
+                <Link className="text-[var(--gold)] hover:underline" to="/register">Register</Link>
+              </>
+            )}
+          </>
+        )}
+      </nav>
+    </header>
+  );
+} 

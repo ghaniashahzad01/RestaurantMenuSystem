@@ -16,17 +16,16 @@ export default function AdminLogin({ setAdmin }) {
       const res = await api.post("admin/login/", { email, password });
 
       console.log("ADMIN LOGIN RESPONSE:", res.data);
-      
+
+      if (!res.data.is_staff) {
+        setError("Not an admin account.");
+        return;
+      }
 
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("is_staff", res.data.is_staff);
-
-      if (res.data.is_staff) {
-        setAdmin(res.data);
-        navigate("/dashboard");
-      } else {
-        setError("Not an admin account.");
-      }
+      localStorage.setItem("admin", JSON.stringify(res.data));
+      setAdmin(res.data);
+      navigate("/dashboard");
 
     } catch (err) {
       setError("Invalid credentials.");
@@ -34,39 +33,60 @@ export default function AdminLogin({ setAdmin }) {
   }
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center px-4">
-      <div className="card w-full max-w-md">
+    <div className="min-h-[80vh] flex items-center justify-center bg-[var(--dark-bg)] px-4">
 
-        <h2 className="text-2xl font-serif text-[var(--gold)] mb-4 text-center">
+      <div className="w-full max-w-md bg-[var(--dark-card)] p-8 rounded-xl shadow-lg border border-[rgba(212,165,116,0.2)]">
+
+        <h2 className="text-3xl font-serif text-[var(--gold)] text-center mb-6">
           Admin Login
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
+
           <div>
-            <label className="text-[var(--muted-text)] text-sm mb-1 block">Email</label>
+            <label className="block text-sm text-[var(--muted-text)] mb-1">
+              Email
+            </label>
             <input
+              type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@gmail.com"
-              className="w-full"
               required
+              className="w-full px-4 py-2 rounded-md bg-[#2A2521] text-[var(--warm-text)] 
+                         border border-[#3a332d] focus:outline-none focus:ring-2 
+                         focus:ring-[var(--gold)] transition"
             />
           </div>
 
           <div>
-            <label className="text-[var(--muted-text)] text-sm mb-1 block">Password</label>
+            <label className="block text-sm text-[var(--muted-text)] mb-1">
+              Password
+            </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full"
               required
+              className="w-full px-4 py-2 rounded-md bg-[#2A2521] text-[var(--warm-text)] 
+                         border border-[#3a332d] focus:outline-none focus:ring-2 
+                         focus:ring-[var(--gold)] transition"
             />
           </div>
 
-          <button className="btn-primary w-full">Login</button>
+          <button
+            className="w-full mt-4 py-2 rounded-md bg-[var(--gold)] text-black font-semibold 
+                       hover:opacity-90 transition"
+          >
+            Login
+          </button>
 
-          {error && <div className="text-[var(--danger)] text-sm text-center">{error}</div>}
+          {error && (
+            <div className="text-[var(--danger)] text-sm text-center mt-2">
+              {error}
+            </div>
+          )}
+
         </form>
       </div>
     </div>

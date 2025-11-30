@@ -11,7 +11,8 @@ export default function AdminOrders() {
 
   async function loadOrders() {
     try {
-      const res = await api.get("user/admin/orders/");
+      const res = await api.get("admin/orders/");
+
       console.log("Orders:", res.data);
       setOrders(res.data);
     } catch (err) {
