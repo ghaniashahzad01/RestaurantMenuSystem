@@ -26,6 +26,7 @@ import EditMenuItem from "./pages/EditMenuItem";
 import Specials from "./pages/Specials";
 import Analytics from "./pages/Analytics";
 import AdminNotifications from "./pages/AdminNotifications";
+import AdminOrders from "./pages/AdminOrders";
 
 export default function App() {
   const [admin, setAdmin] = useState(null);
@@ -54,6 +55,7 @@ export default function App() {
         <Route path="/edit-menu-item/:id" element={<ProtectedRoute admin={admin}><EditMenuItem /></ProtectedRoute>} />
         <Route path="/specials" element={<ProtectedRoute admin={admin}><Specials /></ProtectedRoute>} />
         <Route path="/analytics" element={<ProtectedRoute admin={admin}><Analytics /></ProtectedRoute>} />
+        <Route path="/admin/orders" element={<AdminOrders />} />
         
  
        <Route path="/admin/notifications" element={<AdminNotifications />} />
@@ -63,6 +65,7 @@ export default function App() {
         <Route path="/checkout" element={<UserProtectedRoute user={user}><Checkout /></UserProtectedRoute>} />
         <Route path="/order-success/:id" element={<UserProtectedRoute user={user}><OrderSuccess /></UserProtectedRoute>} />
         <Route path="/orders" element={<UserProtectedRoute user={user}><OrderHistory /></UserProtectedRoute>} />
+        
       </Routes>
     </Layout>
   );

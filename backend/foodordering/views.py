@@ -4,6 +4,9 @@ from django.contrib.auth import authenticate, login, logout
 from rest_framework.views import APIView
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import AllowAny
+from rest_framework.authtoken.models import Token
+from rest_framework import permissions
+
 
 # Admin-side models
 from .models import Category, MenuItem
@@ -62,8 +65,29 @@ class CategoryAnalyticsView(APIView):
         return Response(data)
 
 
-# ---------------------------------------
-# ADMIN LOGIN
+
+# ADMIN NOTIFICATION LIST
+class AdminNotificationList(APIView):
+    def get(self, request):
+        notes = AdminNotification.objects.order_by("-created_at")
+        return Response([
+            {
+                "id": n.id,
+                "message": n.message,
+                "created_at": n.created_at,
+                "is_read": n.is_read,
+            } for n in notes
+        ])
+
+
+#  ADMIN ORDER LIST
+class AdminOrderListView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def get(self, request):
+        orders = Order.objects.all().order_by("-created_at")
+        return Response(OrderSerializer(orders, many=True).data)
+
 # ---------------------------------------
 # ADMIN LOGIN
 class LoginView(APIView):
@@ -76,8 +100,12 @@ class LoginView(APIView):
         user = authenticate(request, username=email, password=password)
 
         if user and user.is_staff:
+            token, _ = Token.objects.get_or_create(user=user)
+
             login(request, user)
+
             return Response({
+                "token": token.key,    # ✅ THIS IS THE FIX
                 "id": user.id,
                 "email": user.email,
                 "full_name": user.full_name,
@@ -85,7 +113,6 @@ class LoginView(APIView):
             })
 
         return Response({"message": "Invalid admin credentials"}, status=400)
-
 
 
 

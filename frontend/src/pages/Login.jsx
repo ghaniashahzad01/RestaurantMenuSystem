@@ -16,6 +16,10 @@ export default function AdminLogin({ setAdmin }) {
       const res = await api.post("admin/login/", { email, password });
 
       console.log("ADMIN LOGIN RESPONSE:", res.data);
+      
+
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("is_staff", res.data.is_staff);
 
       if (res.data.is_staff) {
         setAdmin(res.data);

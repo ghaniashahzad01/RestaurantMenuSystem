@@ -46,6 +46,8 @@ export default function Sidebar() {
         >
           Notifications
         </Link>
+        <Link to="/admin/orders">Orders</Link>
+
       </nav>
 
       <div className="mt-auto text-[var(--muted-text)] text-sm pt-6 border-t border-[#2A2622]">

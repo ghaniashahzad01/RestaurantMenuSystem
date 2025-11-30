@@ -1,10 +1,10 @@
 # backend/accounts/serializers.py
+
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
-from .models import Cart, CartItem, Order, OrderItem
+from .models import Cart, CartItem, Order, OrderItem, AdminNotification
 from foodordering.serializers import MenuItemSerializer
-from .models import AdminNotification
 
 User = get_user_model()
 
@@ -36,7 +36,6 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ("id", "email", "full_name", "is_staff")
 
 
-
 # -------------------------
 # CART ITEM SERIALIZER
 # -------------------------
@@ -49,14 +48,21 @@ class CartItemSerializer(serializers.ModelSerializer):
 
 
 # -------------------------
-# ORDER ITEM SERIALIZER
+# ORDER ITEM SERIALIZER ✅ FINAL FIX
 # -------------------------
 class OrderItemSerializer(serializers.ModelSerializer):
-    menu_item_detail = MenuItemSerializer(source="menu_item", read_only=True)
+    name = serializers.CharField(source="menu_item.name", read_only=True)
+    price = serializers.DecimalField(source="menu_item.price", max_digits=10, decimal_places=2, read_only=True)
 
     class Meta:
         model = OrderItem
-        fields = ["id", "quantity", "unit_price", "menu_item_detail"]
+        fields = [
+            "id",
+            "name",
+            "price",
+            "quantity",
+            "unit_price",
+        ]
 
 
 # -------------------------
@@ -79,6 +85,9 @@ class OrderSerializer(serializers.ModelSerializer):
         ]
 
 
+# -------------------------
+# ADMIN NOTIFICATION
+# -------------------------
 class AdminNotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdminNotification

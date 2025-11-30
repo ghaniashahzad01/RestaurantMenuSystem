@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework.authtoken.models import Token
 
-from .models import Cart, CartItem, Order, OrderItem, AdminNotification
+from .models import Cart, CartItem, Order, OrderItem
 from .serializers import (
     RegisterSerializer, UserSerializer,
     CartItemSerializer, OrderSerializer
@@ -205,15 +205,3 @@ class OrderDetailView(APIView):
         return Response(OrderSerializer(order).data)
 
 
-# ADMIN NOTIFICATION LIST
-class AdminNotificationList(APIView):
-    def get(self, request):
-        notes = AdminNotification.objects.order_by("-created_at")
-        return Response([
-            {
-                "id": n.id,
-                "message": n.message,
-                "created_at": n.created_at,
-                "is_read": n.is_read,
-            } for n in notes
-        ])

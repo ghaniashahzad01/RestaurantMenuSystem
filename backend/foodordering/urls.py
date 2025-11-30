@@ -12,6 +12,8 @@ from .views import (
 
     # ADMIN AUTH
     LoginView, LogoutView,
+    AdminOrderListView,
+    AdminNotificationList, 
 )
 
 urlpatterns = [
@@ -43,5 +45,10 @@ urlpatterns = [
     # --------------------
     path("admin/login/", LoginView.as_view(), name="admin-login"),
     path("admin/logout/", LogoutView.as_view(), name="admin-logout"),
+    path("admin/orders/", AdminOrderListView.as_view(), name="admin-orders"),
+
+
+    # ⭐ ADMIN NOTIFICATIONS API
+    path("admin/notifications/", AdminNotificationList.as_view(), name="admin-notifications"),
 
 ]

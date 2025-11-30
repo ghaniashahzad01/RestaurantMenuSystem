@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
+import { useNavigate } from "react-router-dom";   // ✅ ADD THIS
 
 export default function Dashboard() {
   const [stats, setStats] = useState({ categories:0, items:0, specials:0 });
+  const navigate = useNavigate();   // ✅ ADD THIS
 
   useEffect(() => {
     async function load() {
@@ -19,6 +21,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+
       <h1 className="text-3xl font-serif text-[var(--gold)]">Dashboard Overview</h1>
 
       <div className="grid md:grid-cols-3 gap-6">
@@ -37,6 +40,17 @@ export default function Dashboard() {
           <p className="text-4xl font-serif">{stats.specials}</p>
         </div>
       </div>
+
+      {/* ✅ ADMIN ACTION BUTTON */}
+      <div className="mt-6">
+        <button
+          className="btn-primary"
+          onClick={() => navigate("/admin/orders")}
+        >
+          View Orders
+        </button>
+      </div>
+
     </div>
   );
 }
