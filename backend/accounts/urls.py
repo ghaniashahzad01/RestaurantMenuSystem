@@ -5,6 +5,9 @@ from .views import (
     OrderCreateView, OrderListView, OrderDetailView,
    
 )
+from .views import create_checkout_session
+
+
 
 urlpatterns = [
     path("register/", RegisterView.as_view(), name="user-register"),
@@ -20,5 +23,7 @@ urlpatterns = [
     path("orders/", OrderCreateView.as_view(), name="order-create"),
     path("orders/list/", OrderListView.as_view(), name="order-list"),
     path("orders/<int:id>/", OrderDetailView.as_view(), name="order-detail"),
+    path("create-checkout-session/", create_checkout_session, name="stripe-checkout"),
+
     
 ]

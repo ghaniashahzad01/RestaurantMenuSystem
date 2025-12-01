@@ -17,7 +17,7 @@ import OrderHistory from "./user/OrderHistory";
 
 // ADMIN MODULE
 import Landing from "./pages/Landing";
-import AdminLogin from "./pages/Login";   // ✅ Admin Login
+import AdminLogin from "./pages/Login";   
 import Dashboard from "./pages/Dashboard";
 import Categories from "./pages/Categories";
 import MenuItems from "./pages/MenuItems";
@@ -29,12 +29,17 @@ import Analytics from "./pages/Analytics";
 import AdminNotifications from "./pages/AdminNotifications";
 import AdminOrders from "./pages/AdminOrders";
 
+import StripeSuccess from "./user/StripeSuccess";
+import PaymentFailed from "./user/PaymentFailed";
+
+
+
 export default function App() {
 
   const [admin, setAdmin] = useState(null);
   const [user, setUser] = useState(null);
 
-  // ✅ RESTORE ADMIN AFTER REFRESH
+  
   useEffect(() => {
     const savedAdmin = localStorage.getItem("admin");
     if (savedAdmin) {
@@ -42,7 +47,7 @@ export default function App() {
     }
   }, []);
 
-  // ✅ RESTORE USER AFTER REFRESH
+
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
@@ -52,7 +57,7 @@ export default function App() {
 
   return (
     <>
-      {/* ✅ TOAST ENABLED */}
+     
       <Toaster position="top-center" reverseOrder={false} />
 
       <Layout
@@ -164,7 +169,12 @@ export default function App() {
               <OrderHistory />
             </UserProtectedRoute>
           } />
+        
 
+          <Route path="/stripe-success" element={<StripeSuccess />} />
+          <Route path="/payment-failed" element={<PaymentFailed />} />
+          <Route path="/order-success/:id" element={<OrderSuccess />} />
+          
         </Routes>
       </Layout>
     </>

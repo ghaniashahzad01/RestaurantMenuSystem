@@ -6,16 +6,11 @@ const api = axios.create({
 
 // Attach token automatically (ADMIN FIRST, USER SECOND)
 api.interceptors.request.use((config) => {
-
-  const admin = JSON.parse(localStorage.getItem("admin"));
-  const user = JSON.parse(localStorage.getItem("user"));
-
-  const token = admin?.token || user?.token;
+  const token = localStorage.getItem("token");   // 👈 DIRECT KEY
 
   if (token) {
-    config.headers["Authorization"] = `Token ${token}`;
+    config.headers.Authorization = `Token ${token}`;
   }
-
   return config;
 });
 

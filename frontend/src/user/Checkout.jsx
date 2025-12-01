@@ -11,9 +11,10 @@ export default function Checkout() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState(""); // ⭐ NEW
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [err, setErr] = useState("");
 
+  // ✅ Total calculate
   const total = cart.reduce(
     (sum, item) =>
       sum + parseFloat(item.menu_item_detail.price) * item.quantity,
@@ -25,22 +26,60 @@ export default function Checkout() {
     setErr("");
 
     if (!paymentMethod) {
-      setErr("Please select a payment method.");
+      setErr("Please select a payment method");
+      return;
+    }
+
+    if (!cart.length) {
+      setErr("Cart is empty");
       return;
     }
 
     try {
+      // ======================
+      // ✅ STRIPE PAYMENT
+      // ======================
+      if (paymentMethod === "STRIPE") {
+
+        const response = await fetch(
+          "http://127.0.0.1:8000/api/user/create-checkout-session/",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (!data.url) {
+          setErr("Stripe session failed");
+          return;
+        }
+
+        // ✅ Redirect user to Stripe Checkout (NEW WAY)
+        window.location.href = data.url;
+        return;
+      }
+
+      // ======================
+      // ✅ CASH ON DELIVERY
+      // ======================
       const res = await api.post("user/orders/", {
         name,
         email,
         phone,
         address,
-        payment_method: paymentMethod, // ⭐ SEND COD
+        payment_method: "COD",
       });
 
       reload();
       navigate(`/order-success/${res.data.id}`);
+
     } catch (error) {
+      console.error(error);
       setErr("Failed to place order");
     }
   }
@@ -51,8 +90,9 @@ export default function Checkout() {
 
       <div className="grid md:grid-cols-2 gap-8">
 
-        {/* LEFT: FORM */}
+        {/* LEFT FORM */}
         <form className="card p-6 space-y-4 shadow-lg" onSubmit={handleOrder}>
+
           <div>
             <label className="text-[var(--muted-text)] text-sm block mb-1">
               Name
@@ -61,7 +101,6 @@ export default function Checkout() {
               className="input w-full"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter your full name"
               required
             />
           </div>
@@ -74,7 +113,6 @@ export default function Checkout() {
               className="input w-full"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
               required
             />
           </div>
@@ -87,7 +125,6 @@ export default function Checkout() {
               className="input w-full"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="Optional"
             />
           </div>
 
@@ -96,65 +133,69 @@ export default function Checkout() {
               Address
             </label>
             <textarea
-              className="w-full input"
+              className="input w-full"
               rows="3"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              placeholder="Enter delivery address"
               required
             />
           </div>
 
-          {/* ⭐ PAYMENT METHOD */}
-          <div className="mt-4">
-            <h3 className="text-lg font-medium mb-2">Payment Method</h3>
+          {/* PAYMENT METHOD */}
+          <div>
+            <h3 className="text-lg font-medium">Payment Method</h3>
 
-            <label className="flex items-center gap-3 cursor-pointer">
+            <label className="flex gap-2 mt-2 cursor-pointer">
               <input
                 type="radio"
                 name="payment"
                 value="COD"
                 checked={paymentMethod === "COD"}
                 onChange={(e) => setPaymentMethod(e.target.value)}
-                className="w-4 h-4"
               />
-              <span>Cash on Delivery (COD)</span>
+              Cash on Delivery
+            </label>
+
+            <label className="flex gap-2 mt-2 cursor-pointer">
+              <input
+                type="radio"
+                name="payment"
+                value="STRIPE"
+                checked={paymentMethod === "STRIPE"}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+              />
+              Pay with Card (Stripe)
             </label>
           </div>
 
-          <button
-            className="bg-[var(--gold)] text-black py-3 rounded font-semibold tracking-wide text-lg mt-4 hover:opacity-90 transition w-full"
-          >
+          <button className="bg-[var(--gold)] text-black py-3 rounded font-semibold text-lg w-full mt-4">
             Place Order – Rs. {total.toFixed(2)}
           </button>
 
           {err && <div className="text-[var(--danger)] mt-2">{err}</div>}
+
         </form>
 
-        {/* RIGHT: ORDER SUMMARY */}
+        {/* ORDER SUMMARY */}
         <div className="card p-6 shadow-lg">
           <h3 className="font-semibold mb-4 text-xl">Order Summary</h3>
 
-          <div className="space-y-3">
-            {cart.map((ci) => (
-              <div
-                key={ci.id}
-                className="flex justify-between border-b border-[#3a342e] pb-2"
-              >
-                <span>
-                  {ci.menu_item_detail.name} × {ci.quantity}
-                </span>
-                <span className="text-[var(--gold)]">
-                  Rs. {(ci.menu_item_detail.price * ci.quantity).toFixed(2)}
-                </span>
-              </div>
-            ))}
+          {cart.map((ci) => (
+            <div key={ci.id} className="flex justify-between border-b pb-2">
+              <span>{ci.menu_item_detail.name} × {ci.quantity}</span>
+              <span className="text-[var(--gold)]">
+                Rs. {(ci.menu_item_detail.price * ci.quantity).toFixed(2)}
+              </span>
+            </div>
+          ))}
+
+          <div className="flex justify-between mt-4 font-bold">
+            <span>Total</span>
+            <span className="text-[var(--gold)]">
+              Rs. {total.toFixed(2)}
+            </span>
           </div>
 
-          <div className="flex justify-between mt-6 text-lg font-medium">
-            <span>Total</span>
-            <span className="text-[var(--gold)]">Rs. {total.toFixed(2)}</span>
-          </div>
         </div>
 
       </div>
