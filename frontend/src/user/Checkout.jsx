@@ -14,7 +14,7 @@ export default function Checkout() {
   const [paymentMethod, setPaymentMethod] = useState("");
   const [err, setErr] = useState("");
 
-  // ✅ Total calculate
+  // ✅ TOTAL CALCULATION
   const total = cart.reduce(
     (sum, item) =>
       sum + parseFloat(item.menu_item_detail.price) * item.quantity,
@@ -26,28 +26,26 @@ export default function Checkout() {
     setErr("");
 
     if (!paymentMethod) {
-      setErr("Please select a payment method");
+      setErr("Please select a payment method.");
       return;
     }
 
     if (!cart.length) {
-      setErr("Cart is empty");
+      setErr("Cart is empty.");
       return;
     }
 
     try {
       // ======================
-      // ✅ STRIPE PAYMENT
+      // ✅ STRIPE PAYMENT FLOW
       // ======================
       if (paymentMethod === "STRIPE") {
-
         const response = await fetch(
           "http://127.0.0.1:8000/api/user/create-checkout-session/",
           {
             method: "GET",
             headers: {
               Authorization: `Token ${localStorage.getItem("token")}`,
-              "Content-Type": "application/json",
             },
           }
         );
@@ -55,17 +53,17 @@ export default function Checkout() {
         const data = await response.json();
 
         if (!data.url) {
-          setErr("Stripe session failed");
+          setErr("Stripe session failed.");
           return;
         }
 
-        // ✅ Redirect user to Stripe Checkout (NEW WAY)
+        // ✅ REDIRECT TO STRIPE
         window.location.href = data.url;
         return;
       }
 
       // ======================
-      // ✅ CASH ON DELIVERY
+      // ✅ CASH ON DELIVERY FLOW
       // ======================
       const res = await api.post("user/orders/", {
         name,
@@ -77,10 +75,9 @@ export default function Checkout() {
 
       reload();
       navigate(`/order-success/${res.data.id}`);
-
     } catch (error) {
       console.error(error);
-      setErr("Failed to place order");
+      setErr("Failed to place order.");
     }
   }
 
@@ -94,9 +91,7 @@ export default function Checkout() {
         <form className="card p-6 space-y-4 shadow-lg" onSubmit={handleOrder}>
 
           <div>
-            <label className="text-[var(--muted-text)] text-sm block mb-1">
-              Name
-            </label>
+            <label className="text-[var(--muted-text)] text-sm block mb-1">Name</label>
             <input
               className="input w-full"
               value={name}
@@ -106,9 +101,7 @@ export default function Checkout() {
           </div>
 
           <div>
-            <label className="text-[var(--muted-text)] text-sm block mb-1">
-              Email
-            </label>
+            <label className="text-[var(--muted-text)] text-sm block mb-1">Email</label>
             <input
               className="input w-full"
               value={email}
@@ -118,9 +111,7 @@ export default function Checkout() {
           </div>
 
           <div>
-            <label className="text-[var(--muted-text)] text-sm block mb-1">
-              Phone
-            </label>
+            <label className="text-[var(--muted-text)] text-sm block mb-1">Phone</label>
             <input
               className="input w-full"
               value={phone}
@@ -129,9 +120,7 @@ export default function Checkout() {
           </div>
 
           <div>
-            <label className="text-[var(--muted-text)] text-sm block mb-1">
-              Address
-            </label>
+            <label className="text-[var(--muted-text)] text-sm block mb-1">Address</label>
             <textarea
               className="input w-full"
               rows="3"
@@ -141,7 +130,7 @@ export default function Checkout() {
             />
           </div>
 
-          {/* PAYMENT METHOD */}
+          {/* ✅ PAYMENT METHOD */}
           <div>
             <h3 className="text-lg font-medium">Payment Method</h3>
 
@@ -176,7 +165,7 @@ export default function Checkout() {
 
         </form>
 
-        {/* ORDER SUMMARY */}
+        {/* RIGHT SUMMARY */}
         <div className="card p-6 shadow-lg">
           <h3 className="font-semibold mb-4 text-xl">Order Summary</h3>
 
@@ -191,11 +180,8 @@ export default function Checkout() {
 
           <div className="flex justify-between mt-4 font-bold">
             <span>Total</span>
-            <span className="text-[var(--gold)]">
-              Rs. {total.toFixed(2)}
-            </span>
+            <span className="text-[var(--gold)]">Rs. {total.toFixed(2)}</span>
           </div>
-
         </div>
 
       </div>
