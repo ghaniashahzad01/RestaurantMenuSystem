@@ -8,7 +8,7 @@ export default function OrderHistory() {
 
   useEffect(() => {
     api
-      .get("user/orders/list/")   // ✅ Correct endpoint
+      .get("user/orders/list/")  
       .then((res) => {
         setOrders(res.data);
         setLoading(false);
@@ -36,7 +36,7 @@ export default function OrderHistory() {
       <div className="grid gap-4">
         {orders.map((order) => {
           const totalAmount = order.items.reduce((sum, item) => {
-            return sum + item.unit_price * item.quantity;  // ✅ Correct fields from OrderSerializer
+            return sum + item.unit_price * item.quantity; 
           }, 0);
 
           return (

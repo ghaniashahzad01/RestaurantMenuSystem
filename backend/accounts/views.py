@@ -121,6 +121,8 @@ class CartUpdateView(APIView):
 
 
 class OrderCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         user = request.user
         data = request.data
@@ -129,17 +131,24 @@ class OrderCreateView(APIView):
         if not cart_items.exists():
             return Response({"detail": "Cart empty"}, status=400)
 
+        payment_method = data.get("payment_method").lower()
+
+        
+        total = sum(ci.menu_item.price * ci.quantity for ci in cart_items)
+
+       
         order = Order.objects.create(
             user=user,
             name=data.get("name"),
             email=data.get("email"),
             phone=data.get("phone"),
             address=data.get("address"),
-            payment_method=data.get("payment_method"),
-            is_paid=(data.get("payment_method") == "STRIPE")
+            total=total,
+            payment_method=payment_method,
+            is_paid=True if payment_method == "cod" else False
         )
 
-        total = 0
+       
         for ci in cart_items:
             OrderItem.objects.create(
                 order=order,
@@ -147,17 +156,22 @@ class OrderCreateView(APIView):
                 quantity=ci.quantity,
                 unit_price=ci.menu_item.price
             )
-            total += ci.menu_item.price * ci.quantity
-
-        order.total = total
-        order.save()
-        cart_items.delete()
 
         AdminNotification.objects.create(
-            message=f"ORDER #{order.id} • {user.email} • {order.payment_method}"
+            message=f"ORDER #{order.id} • {user.email} • {payment_method.upper()}"
         )
 
-        return Response(OrderSerializer(order).data)
+        
+        if payment_method == "cod":
+            cart_items.delete()
+            return Response(OrderSerializer(order).data)
+
+       
+        return Response({
+            "order_id": order.id,
+            "message": "Proceed to Stripe payment"
+        })
+
 
 
 class OrderListView(APIView):
@@ -172,7 +186,7 @@ class OrderDetailView(APIView):
         return Response(OrderSerializer(order).data)
 
 
-# ✅ STRIPE SESSION
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def create_checkout_session(request):
