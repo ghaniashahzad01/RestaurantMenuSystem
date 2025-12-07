@@ -22,9 +22,22 @@ export default function AdminLogin({ setAdmin }) {
         return;
       }
 
+      // ⭐ CLEAN ADMIN OBJECT
+      const adminData = {
+        id: res.data.id,
+        email: res.data.email,
+        full_name: res.data.full_name ?? "Admin",
+        is_staff: res.data.is_staff
+      };
+
+      // ⭐ STORE IN LOCAL STORAGE
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("admin", JSON.stringify(res.data));
-      setAdmin(res.data);
+      localStorage.setItem("admin", JSON.stringify(adminData));
+      localStorage.setItem("is_staff", "true");
+
+      // ⭐ UPDATE ADMIN STATE
+      setAdmin(adminData);
+
       navigate("/dashboard");
 
     } catch (err) {

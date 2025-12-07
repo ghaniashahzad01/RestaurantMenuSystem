@@ -17,7 +17,7 @@ import OrderHistory from "./user/OrderHistory";
 
 // ADMIN MODULE
 import Landing from "./pages/Landing";
-import AdminLogin from "./pages/Login";   
+import AdminLogin from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Categories from "./pages/Categories";
 import MenuItems from "./pages/MenuItems";
@@ -32,14 +32,12 @@ import AdminOrders from "./pages/AdminOrders";
 import StripeSuccess from "./user/StripeSuccess";
 import PaymentFailed from "./user/PaymentFailed";
 
-
-
 export default function App() {
 
+  // ⭐ ADMIN STATE (ADMIN CONTEXT NAHI HAI → THIS IS OK)
   const [admin, setAdmin] = useState(null);
-  const [user, setUser] = useState(null);
 
-  
+  // ⭐ Restore admin from storage
   useEffect(() => {
     const savedAdmin = localStorage.getItem("admin");
     if (savedAdmin) {
@@ -47,38 +45,54 @@ export default function App() {
     }
   }, []);
 
-
-  useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-  }, []);
-
   return (
     <>
-     
       <Toaster position="top-center" reverseOrder={false} />
 
-      <Layout
-        admin={admin}
-        setAdmin={setAdmin}
-        user={user}
-        setUser={setUser}
-      >
+      {/* ⭐ REMOVE user + setUser — USER CONTEXT WILL HANDLE IT */}
+
+      <Layout admin={admin} setAdmin={setAdmin}>
         <Routes>
 
+          {/* ======================= PUBLIC ROUTES ======================= */}
           <Route path="/" element={<Landing admin={admin} />} />
 
-          {/* ================= ADMIN AUTH ================= */}
+          {/* ======================= ADMIN AUTH ======================= */}
           <Route path="/admin-login" element={<AdminLogin setAdmin={setAdmin} />} />
 
-          {/* ================= USER AUTH ================= */}
-          <Route path="/user-login" element={<UserLogin setUser={setUser} />} />
+          {/* ======================= USER AUTH ======================= */}
+          {/* ⭐ UserLogin no longer receives setUser */}
+          <Route path="/user-login" element={<UserLogin />} />
           <Route path="/register" element={<UserRegister />} />
 
+          {/* ======================= USER ROUTES ======================= */}
+          <Route path="/menu" element={<UserMenu />} />
 
-          {/* ================ ADMIN ROUTES ================= */}
+          <Route path="/cart" element={
+            <UserProtectedRoute>
+              <Cart />
+            </UserProtectedRoute>
+          } />
+
+          <Route path="/checkout" element={
+            <UserProtectedRoute>
+              <Checkout />
+            </UserProtectedRoute>
+          } />
+
+          <Route path="/order-success/:id" element={
+            <UserProtectedRoute>
+              <OrderSuccess />
+            </UserProtectedRoute>
+          } />
+
+          <Route path="/orders" element={
+            <UserProtectedRoute>
+              <OrderHistory />
+            </UserProtectedRoute>
+          } />
+
+          {/* ======================= ADMIN ROUTES ======================= */}
           <Route
             path="/dashboard"
             element={
@@ -142,39 +156,10 @@ export default function App() {
             </ProtectedRoute>
           } />
 
-
-          {/* ================= USER ROUTES ================= */}
-          <Route path="/menu" element={<UserMenu />} />
-
-          <Route path="/cart" element={
-            <UserProtectedRoute user={user}>
-              <Cart />
-            </UserProtectedRoute>
-          } />
-
-          <Route path="/checkout" element={
-            <UserProtectedRoute user={user}>
-              <Checkout />
-            </UserProtectedRoute>
-          } />
-
-          <Route path="/order-success/:id" element={
-            <UserProtectedRoute user={user}>
-              <OrderSuccess />
-            </UserProtectedRoute>
-          } />
-
-          <Route path="/orders" element={
-            <UserProtectedRoute user={user}>
-              <OrderHistory />
-            </UserProtectedRoute>
-          } />
-        
-
+          {/* ======================= PAYMENT ROUTES ======================= */}
           <Route path="/stripe-success" element={<StripeSuccess />} />
           <Route path="/payment-failed" element={<PaymentFailed />} />
-          <Route path="/order-success/:id" element={<OrderSuccess />} />
-          
+
         </Routes>
       </Layout>
     </>

@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { useUser } from "../context/UserContext";
 
-export default function UserLogin({ setUser }) {
+export default function UserLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  // ⭐ get setUser FROM CONTEXT (not props)
+  const { setUser } = useUser();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -19,14 +23,15 @@ export default function UserLogin({ setUser }) {
         id: res.data.id,
         email: res.data.email,
         full_name: res.data.full_name,
-        is_staff: res.data.is_staff
+        is_staff: res.data.is_staff,
       };
 
-      // ✅ SAVE CLEAN USER DATA
+      // save to storage
       localStorage.setItem("user", JSON.stringify(userData));
       localStorage.setItem("token", res.data.token);
+      localStorage.removeItem("admin");
 
-      // ✅ SYNC CONTEXT WITH STORAGE
+      // ⭐ update global context user
       setUser(userData);
 
       navigate("/menu");
@@ -43,13 +48,13 @@ export default function UserLogin({ setUser }) {
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
         />
 
         <input
           value={password}
-          onChange={e => setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.target.value)}
           type="password"
           placeholder="Password"
         />

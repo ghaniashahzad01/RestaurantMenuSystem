@@ -14,6 +14,7 @@ from accounts.serializers import OrderSerializer
 from .models import Category, MenuItem
 from .serializers import CategorySerializer, MenuItemSerializer
 
+
 # ---------------------------------------
 # CATEGORY CRUD
 # ---------------------------------------
@@ -25,6 +26,11 @@ class CategoryListCreateView(generics.ListCreateAPIView):
 class CategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+
+    # ✅ partial update allowed
+    def update(self, request, *args, **kwargs):
+        kwargs["partial"] = True
+        return super().update(request, *args, **kwargs)
 
 
 # ---------------------------------------
@@ -39,15 +45,41 @@ class MenuItemDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
 
+    # ✅ FIXED — no more null category
+    def update(self, request, *args, **kwargs):
+        kwargs["partial"] = True   # ✅ keep old values if not sent
+        return super().update(request, *args, **kwargs)
 
+    def destroy(self, request, *args, **kwargs):
+        item = self.get_object()
+
+        # ----------- DELETE RELATED CHILD OBJECTS FIRST -----------
+        from accounts.models import OrderItem   # avoid circular import
+        from accounts.models import CartItem    # if CartItem also exists
+
+        OrderItem.objects.filter(menu_item=item).delete()
+        CartItem.objects.filter(menu_item=item).delete()
+
+      
+
+        # Now safely delete the menu item
+        item.delete()
+
+        return Response({"message": "Menu item deleted successfully"}, status=200)
 # ---------------------------------------
-# TOGGLE SPECIAL
+# TOGGLE SPECIAL (MARK)
 # ---------------------------------------
 class ToggleSpecialView(APIView):
+
     def post(self, request, pk):
-        item = MenuItem.objects.get(id=pk)
+
+        try:
+            item = MenuItem.objects.get(id=pk)
+        except MenuItem.DoesNotExist:
+            return Response({"error": "Item not found"}, status=404)
+
         item.is_special = not item.is_special
-        item.save()
+        item.save(update_fields=["is_special"])   # ✅ update only mark
         return Response({"message": "Special status updated"})
 
 
@@ -55,13 +87,17 @@ class ToggleSpecialView(APIView):
 # CATEGORY ANALYTICS
 # ---------------------------------------
 class CategoryAnalyticsView(APIView):
+
     def get(self, request):
         data = []
         categories = Category.objects.all()
 
         for cat in categories:
             count = MenuItem.objects.filter(category=cat).count()
-            data.append({"category": cat.name, "count": count})
+            data.append({
+                "category": cat.name,
+                "count": count
+            })
 
         return Response(data)
 
@@ -74,6 +110,7 @@ class AdminNotificationList(APIView):
 
     def get(self, request):
         notes = AdminNotification.objects.order_by("-created_at")
+        
         return Response([
             {
                 "id": n.id,
@@ -103,12 +140,14 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+
         email = request.data.get("email")
         password = request.data.get("password")
 
         user = authenticate(username=email, password=password)
 
         if user and user.is_staff:
+
             token, _ = Token.objects.get_or_create(user=user)
             login(request, user)
 
@@ -127,6 +166,7 @@ class LoginView(APIView):
 # ADMIN LOGOUT
 # ---------------------------------------
 class LogoutView(APIView):
+
     def post(self, request):
         logout(request)
         return Response({"message": "Logged out"})

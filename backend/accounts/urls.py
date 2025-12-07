@@ -5,6 +5,8 @@ from .views import (
     OrderCreateView, OrderListView, OrderDetailView,
     create_checkout_session
 )
+from .views import StripeOrderConfirmView
+
 
 urlpatterns = [
     path("register/", RegisterView.as_view()),
@@ -22,4 +24,6 @@ urlpatterns = [
     path("orders/<int:id>/", OrderDetailView.as_view()),
 
     path("create-checkout-session/", create_checkout_session),
+    path("stripe-confirm/", StripeOrderConfirmView.as_view()),
+
 ]

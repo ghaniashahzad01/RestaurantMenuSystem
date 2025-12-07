@@ -3,39 +3,58 @@ import api from "../services/api";
 import { useNavigate } from "react-router-dom";
 
 export default function AddMenuItem() {
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
   const [image, setImage] = useState(null);
   const [categories, setCategories] = useState([]);
+
   const navigate = useNavigate();
 
+ 
   useEffect(() => {
-    api
-      .get("categories/")
-      .then((res) => setCategories(res.data))
-      .catch((err) => console.error(err));
+    async function loadCategories() {
+      try {
+        const res = await api.get("/categories/");
+        setCategories(res.data);
+      } catch (error) {
+        console.error("Category load failed:", error);
+      }
+    }
+
+    loadCategories();
   }, []);
 
+ 
   async function handleSubmit(e) {
     e.preventDefault();
+
+    if (!category) {
+      alert("Please select a category");
+      return;
+    }
 
     const formData = new FormData();
     formData.append("name", name);
     formData.append("description", description);
     formData.append("price", price);
-    formData.append("category", category);
+    formData.append("category", parseInt(category)); 
     if (image) formData.append("image", image);
 
     try {
-      await api.post("menu/", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      await api.post("/menu/", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
+
+      alert("Menu item created successfully");
       navigate("/menu-items");
     } catch (err) {
-      console.error(err);
-      alert("Failed to create item");
+      console.error("CREATE ERROR:", err.response?.data || err.message);
+      alert("Failed to create item — check console");
     }
   }
 
@@ -46,7 +65,7 @@ export default function AddMenuItem() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
-          {/* Name */}
+          {/* NAME */}
           <div>
             <label className="text-[var(--muted-text)] text-sm mb-1 block">Name</label>
             <input
@@ -58,50 +77,53 @@ export default function AddMenuItem() {
             />
           </div>
 
-          {/* Description */}
+          {/* DESCRIPTION */}
           <div>
             <label className="text-[var(--muted-text)] text-sm mb-1 block">Description</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Short description of the dish"
+              placeholder="Short description"
               rows="3"
               className="w-full"
             />
           </div>
 
-          {/* Price */}
+          {/* PRICE */}
           <div>
             <label className="text-[var(--muted-text)] text-sm mb-1 block">Price</label>
             <input
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              placeholder="600"
               type="number"
+              placeholder="600"
               className="w-full"
               required
             />
           </div>
 
-          {/* Category */}
+          {/* CATEGORY */}
           <div>
             <label className="text-[var(--muted-text)] text-sm mb-1 block">Category</label>
+
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className="w-full"
               required
             >
-              <option value="">Select a category</option>
+              <option value="">Select Category</option>
+
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
               ))}
+
             </select>
           </div>
 
-          {/* Image */}
+          {/* IMAGE */}
           <div>
             <label className="text-[var(--muted-text)] text-sm mb-1 block">Image</label>
             <input
@@ -112,9 +134,11 @@ export default function AddMenuItem() {
             />
           </div>
 
-          {/* Submit */}
+          {/* BUTTON */}
           <div>
-            <button className="btn-primary w-full">Create Item</button>
+            <button type="submit" className="btn-primary w-full">
+              Create Item
+            </button>
           </div>
 
         </form>

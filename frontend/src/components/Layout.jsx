@@ -2,10 +2,10 @@ import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
 
-export default function Layout({ children, admin, setAdmin, user, setUser }) {
+export default function Layout({ children, admin, setAdmin }) {
   return (
     <>
-      <Navbar admin={admin} setAdmin={setAdmin} setUser={setUser} />
+      <Navbar admin={admin} setAdmin={setAdmin} />
 
       <main className="flex min-h-screen">
         {admin && <Sidebar />}
@@ -17,9 +17,8 @@ export default function Layout({ children, admin, setAdmin, user, setUser }) {
             {children}
           </div>
 
-          {/* ✅ FOOTER FOR BOTH ADMIN & USER */}
+          {/* FOOTER */}
           <Footer />
-
         </div>
       </main>
     </>

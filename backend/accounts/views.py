@@ -8,6 +8,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
+
 from .models import Cart, CartItem, OrderItem
 from accounts.models import Order
 from foodordering.models import AdminNotification
@@ -187,9 +188,14 @@ class OrderDetailView(APIView):
 
 
 
-@api_view(["GET"])
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_checkout_session(request):
+
+    name = request.data.get("name")
+    email = request.data.get("email")
+    phone = request.data.get("phone")
+    address = request.data.get("address")
 
     cart_items = CartItem.objects.filter(cart__user=request.user)
     if not cart_items.exists():
@@ -205,16 +211,71 @@ def create_checkout_session(request):
             line_items=[{
                 "price_data": {
                     "currency": "pkr",
-                    "product_data": {"name": "Restaurant Order"},
+                    "product_data": {"name": f"Order by {name}"},
                     "unit_amount": amount,
                 },
                 "quantity": 1,
             }],
-            success_url="http://localhost:5173/stripe-success",
+            success_url="http://localhost:5173/stripe-success?session_id={CHECKOUT_SESSION_ID}",
+
             cancel_url="http://localhost:5173/payment-failed",
+            metadata={
+                "name": name,
+                "email": email,
+                "phone": phone,
+                "address": address,
+            }
         )
 
         return JsonResponse({"url": session.url})
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+
+class StripeOrderConfirmView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        session_id = request.data.get("session_id")
+
+        if not session_id:
+            return Response({"detail": "Missing session_id"}, status=400)
+
+        # Retrieve real Stripe session
+        session = stripe.checkout.Session.retrieve(session_id)
+        metadata = session.metadata  # ⭐ Real metadata sent from frontend
+
+        cart_items = CartItem.objects.filter(cart__user=user)
+        if not cart_items.exists():
+            return Response({"detail": "Cart empty"}, status=400)
+
+        total = sum(ci.menu_item.price * ci.quantity for ci in cart_items)
+
+        order = Order.objects.create(
+            user=user,
+            name=metadata.get("name"),
+            email=metadata.get("email"),
+            phone=metadata.get("phone"),
+            address=metadata.get("address"),
+            total=total,
+            payment_method="stripe",
+            is_paid=True
+        )
+
+        for ci in cart_items:
+            OrderItem.objects.create(
+                order=order,
+                menu_item=ci.menu_item,
+                quantity=ci.quantity,
+                unit_price=ci.menu_item.price
+            )
+
+        AdminNotification.objects.create(
+            message=f"ORDER #{order.id} • {user.email} • STRIPE"
+        )
+
+        cart_items.delete()
+
+        return Response(OrderSerializer(order).data)
